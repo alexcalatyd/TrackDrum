@@ -1,36 +1,69 @@
-# TrackDrum
+<p align="center"><img src="Art/AppIcon.png" width="128" alt="TrackDrum icon"></p>
 
-Convierte el MacBook en una batería y en un lanzador de loops usando sus sensores ocultos.
+<h1 align="center">TrackDrum</h1>
+
+<p align="center">Turn your MacBook's trackpad into an instrument — and loop what you play.</p>
+
+TrackDrum is a native macOS app (Swift + a WKWebView interface) that reads raw multitouch data from the trackpad, so every finger, position and pressure becomes a note. It also uses the MacBook's hidden sensors: the lid angle works as a hi-hat pedal and a tap on the palm rest plays the kick.
+
+*La app está en inglés y en español: sigue el idioma del Mac y se puede cambiar en Ajustes.*
+
+## Instruments
+
+- **Pads** — 4×2 drum pads with four kits (808, Acoustic, Electro, 8-bit). Drop your own samples on any pad.
+- **Drums** — a full kit mapped 1:1 onto the trackpad.
+- **Guitar** — real-time Karplus-Strong strings. Pick chords with the keyboard (A–Ñ, Z–N) and strum by swiping across the trackpad.
+- **Bass** — four strings and 12 frets laid out on the trackpad, with the notes of the current scale marked.
+- **Keys** — polyphonic synth: horizontal = notes, vertical = brightness, pressure = vibrato.
+- **Sampler** — eight melodic pads that follow the key; load any sound and tune it.
+- **Beats** — 16-step sequencer with presets, swing and "send to track".
+
+## Looper
+
+Six stereo tracks with volume, pan, mute/solo and reverb/delay sends, four scenes (A–D) that can be chained into a song, quantize, replace/overdub, undo, master compressor, and WAV export (full mix or separate tracks). Projects are saved as `.trackdrum` folders and autosaved.
+
+There's also latency calibration for Bluetooth headphones, haptic feedback on the trackpad and a virtual MIDI output to drive GarageBand, Logic or any DAW.
+
+## Requirements
+
+- A MacBook with Apple Silicon and a Force Touch trackpad
+- macOS 13 or later
+- Xcode command line tools (`xcode-select --install`)
+
+## Install
 
 ```sh
-./run.sh                               # compila y abre
-.build/release/TrackDrum --selftest    # comprueba que todos los sonidos se generan bien
+git clone https://github.com/alexcalatyd/TrackDrum.git
+cd TrackDrum
+./Scripts/build-app.sh
 ```
 
-## Qué hace
-- **Trackpad = 8 pads** (4×2), multitouch, con volumen según la fuerza (área de contacto, autocalibrada).
-- **Háptica** a bajo nivel (`MTActuatorActuate`): vibración según la fuerza y metrónomo háptico.
-- **4 kits sintetizados**: 808, Acústico, Electro y 8-bit.
-- **Tus samples**: arrastra un audio a un pad o usa «Cambiar sonido»; «Original» lo quita. Se guardan entre sesiones.
-- **Looper**: graba por capas sobre 1, 2 o 4 compases, con cuantización a semicorcheas.
-- **Modo loops**: 8 loops a tempo (Beat, Break, Charles, Percu, Bajo, Acordes, Arpegio, Pad) que entran en el siguiente compás.
-- **Tapa = pedal del charles** (sensor de ángulo de la tapa): échala hacia atrás para abrirlo y vuelve para cerrarlo.
-- **Golpe en el chasis = bombo** (acelerómetro oculto de Apple Silicon), con filtros para no confundirlo con el trackpad, el teclado o los altavoces.
+This builds `TrackDrum.app`, signs it locally and copies it to `/Applications`. Use `--no-install` to leave it in `build/`.
 
-## Cómo se usa
-Al abrirla por primera vez sale una guía de 5 pasos (se puede volver a ver con el botón **?**).
-Todo tiene su botón; algunos atajos: Espacio (play/stop), R (grabar), Z (deshacer), C (borrar),
-M (metrónomo), Tab (Batería/Loops), 1–4 (kit), ↑↓ (tempo).
+For development, `./run.sh` builds and runs it from the terminal so you can see the logs.
 
-Hay dos modos:
-- **Modo ratón** (al abrir): el trackpad funciona normal para usar la interfaz y no suena nada.
-- **Modo tocar** (⏎ o «Empezar a tocar»): el trackpad es la batería y el cursor se bloquea y se oculta.
-  Todo se controla con el teclado (hay una leyenda en pantalla) y **Esc** devuelve el ratón.
+### Tap-to-kick (optional)
 
-## Por dentro
-- `Sources/CMultitouch`: puente en C con `MultitouchSupport` (privado), el motor háptico y los sensores HID (tapa: page 0x20/usage 0x8A; acelerómetro: AppleSPU page 0xFF00/usage 3).
-- `AudioEngine.swift`: sampler propio dentro de `AVAudioSourceNode` (búfer de 128 muestras), con voces, metrónomo, looper y loops sincronizados al sample.
-- `Kits.swift`, `Loops.swift`, `DSP.swift`: toda la síntesis.
-- `Web/index.html`: la interfaz (WKWebView) con componentes al estilo shadcn/ui y Magic UI.
+The palm-rest accelerometer only sends data to root. Instead of running the whole app with `sudo`, TrackDrum installs a tiny helper (a LaunchDaemon) the first time you enable it in **Settings → Tap the chassis = kick**. It asks for your password once and only streams accelerometer readings to the app over localhost while TrackDrum is open. You can remove it from the same place.
 
-Usa APIs privadas: no es apta para la App Store.
+## Keyboard shortcuts
+
+| Key | Action |
+| --- | --- |
+| `1`–`7` | Switch screen |
+| `Return` | Play with the trackpad (locks the cursor) · `Esc` releases it |
+| `Space` | Play / stop |
+| `R` | Record on the selected track |
+| `M` | Metronome |
+| `↑` / `↓` | Tempo (hold `Shift` for ±5) |
+| `⌘Z` | Undo last take |
+| `⌘N` `⌘O` `⌘S` `⇧⌘S` `⌘E` | New, open, save, save as, export |
+
+## How it works
+
+- `Sources/CMultitouch` — C bridge to the private `MultitouchSupport` framework, the haptic engine (`MTActuatorActuate`) and the hidden HID sensors (lid angle: page 0x20 / usage 0x8A; accelerometer: AppleSPU page 0xFF00 / usage 3).
+- `Sources/TrackDrum` — audio engine (`AVAudioEngine` with a sample-accurate looper), synths, effects, MIDI, projects and the app itself.
+- `Sources/TrackDrum/Web/index.html` — the whole interface.
+- `.build/release/TrackDrum --selftest` renders every sound, effect and a project round-trip, and checks that they're healthy.
+
+TrackDrum uses private macOS APIs, so it can't be distributed through the App Store.

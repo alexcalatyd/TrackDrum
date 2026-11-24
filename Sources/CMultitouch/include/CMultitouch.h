@@ -50,5 +50,9 @@ typedef void (*AccelCallback)(double x, double y, double z);
 /// Arranca el acelerómetro oculto en un hilo propio (~800 Hz, en g).
 /// Devuelve 1 si se encontró el sensor.
 int accel_start(AccelCallback callback);
+/// Vuelve a despertar el acelerómetro (macOS lo duerme tras el reposo). Requiere root.
+void accel_wake(void);
+/// Cierra el acelerómetro (deja de mandar datos).
+void accel_stop(void);
 
 #endif

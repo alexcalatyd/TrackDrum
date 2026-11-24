@@ -19,6 +19,9 @@ final class TouchInput {
     var onFrame: (([Finger]) -> Void)?
 
     var useVelocity = true
+    /// Respuesta inmediata: suena en el primer fotograma del toque en vez de esperar al segundo
+    /// para medir la fuerza (≈ 8–12 ms menos). La fuerza se calcula con lo que hay en ese instante.
+    var instant = false
     private(set) var lastSize: Float = 0
     private(set) var lastVelocity: Float = 0
 
@@ -64,7 +67,8 @@ final class TouchInput {
             } else {
                 onContact?()
                 var p = Pending(finger: finger, frames: 1, maxSize: t.size, fired: false)
-                if !useVelocity { fire(&p) }
+                // En el primer fotograma el dedo aún no está aplastado del todo: lo compensamos.
+                if !useVelocity || instant { p.maxSize = t.size * 1.35; fire(&p) }
                 active[t.identifier] = p
             }
         }

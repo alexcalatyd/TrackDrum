@@ -5,500 +5,530 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TrackDrum</title>
 <style>
-/* Tokens del tema oscuro de shadcn/ui */
 :root {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --radius: 0.625rem;
-  --c1: oklch(0.82 0.16 85);   /* charles */
-  --c2: oklch(0.72 0.17 162);  /* tom alto */
-  --c3: oklch(0.70 0.12 200);  /* tom bajo */
-  --c4: oklch(0.90 0.08 100);  /* platillo */
-  --c5: oklch(0.65 0.22 20);   /* bombo */
-  --c6: oklch(0.62 0.19 264);  /* caja */
-  --c7: oklch(0.65 0.24 304);  /* clap */
-  --c8: oklch(0.72 0.17 55);   /* cencerro */
-  --rec: oklch(0.64 0.23 25);
+  --bg: #111110;
+  --panel: #171716;
+  --raise: #1f1f1d;
+  --line: #2a2a27;
+  --line-2: #3a3a36;
+  --text: #ecebe6;
+  --dim: #8d8b84;
+  --faint: #5c5a55;
+  --accent: #ff6b2c;
+  --rec: #ff3b30;
+  --i-pads: #e3a73b;
+  --i-kit: #d9603f;
+  --i-guitar: #4fae8f;
+  --i-beats: #8494e0;
+  --i-bass: #a983d2;
+  --i-keys: #4fa3c7;
+  --i-sampler: #d4789b;
+  --mono: "SF Mono", ui-monospace, Menlo, monospace;
   color-scheme: dark;
 }
-* { box-sizing: border-box; border-color: var(--border); }
+* { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font: 14px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  user-select: none; -webkit-user-select: none;
-  cursor: default;
+  background: var(--bg); color: var(--text);
+  font: 13px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; cursor: default;
 }
-button { font: inherit; color: inherit; }
-button:not(:disabled) { cursor: pointer; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:disabled { cursor: default; opacity: .35; }
+input[type=range] { -webkit-appearance: none; appearance: none; height: 16px; background: none; margin: 0; --p: 50%; }
+input[type=range]::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(to right, var(--text) var(--p), var(--line-2) var(--p)); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; margin-top: -4px; border-radius: 50%; background: var(--text); }
+kbd { font: 500 11px var(--mono); color: var(--dim); }
 
-#app { height: 100%; display: grid; grid-template-rows: auto auto 1fr auto; gap: 12px; padding: 14px 18px 18px; }
+#app { height: 100%; display: grid; grid-template-rows: 48px 1fr auto; grid-template-columns: minmax(0, 1fr); }
 
-/* ---------- Botones (shadcn) ---------- */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  height: 36px; padding: 0 14px; border-radius: calc(var(--radius) - 2px);
-  font-size: 14px; font-weight: 500; white-space: nowrap;
-  border: 1px solid transparent; background: transparent;
-  transition: background .15s, color .15s, border-color .15s, box-shadow .15s, transform .08s;
-}
-.btn:active { transform: scale(.97); }
-.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }
-.btn.default { background: var(--primary); color: var(--primary-foreground); }
-.btn.default:hover { background: color-mix(in oklch, var(--primary) 90%, transparent); }
-.btn.outline { background: color-mix(in oklch, var(--input) 30%, transparent); border-color: var(--input); }
-.btn.outline:hover { background: color-mix(in oklch, var(--input) 50%, transparent); }
-.btn.ghost:hover { background: var(--accent); }
-.btn.icon { width: 36px; padding: 0; }
-.btn.sm { height: 32px; padding: 0 10px; font-size: 13px; }
-.btn svg { width: 16px; height: 16px; flex: none; }
-.btn:disabled { opacity: .45; pointer-events: none; }
+/* ---------- Barra superior ---------- */
+.top { display: flex; align-items: center; gap: 24px; padding: 0 20px; border-bottom: 1px solid var(--line); }
+.proj { display: flex; align-items: center; gap: 7px; max-width: 190px; font-weight: 500; }
+.proj .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj .dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--dim); display: none; }
+.proj.unsaved .dot { display: block; }
+.proj svg { flex: none; width: 10px; height: 10px; color: var(--faint); }
+.proj:hover svg { color: var(--text); }
+.notice { color: var(--accent); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.screens { display: flex; gap: 18px; height: 100%; }
+.screens button { position: relative; height: 100%; color: var(--dim); font-size: 14px; font-weight: 500; }
+.screens button:hover { color: var(--text); }
+.screens button.on { color: var(--text); }
+.screens button.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--text); }
+.screens button kbd { margin-left: 5px; font-size: 10px; color: var(--faint); }
+.transport { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.tbtn { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 4px; }
+.tbtn:hover { background: var(--raise); }
+.tbtn svg { width: 15px; height: 15px; }
+#recBtn .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--rec); }
+#recBtn.on .dot { background: var(--rec); animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .35; } }
+.tempo { display: flex; align-items: center; gap: 6px; font-family: var(--mono); }
+.tempo b { min-width: 34px; text-align: right; font-size: 15px; font-weight: 500; }
+.tempo span { color: var(--dim); font-size: 11px; }
+.tempo button { width: 20px; height: 20px; color: var(--dim); font-size: 15px; line-height: 1; }
+.tempo button:hover { color: var(--text); }
+.tempo.locked b { color: var(--dim); }
+.barpos { font: 11px var(--mono); color: var(--dim); min-width: 30px; text-align: right; }
+.beatdots { display: flex; gap: 4px; }
+.beatdots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line-2); }
+.beatdots i.now { background: var(--text); }
+.beatdots.rec i.now { background: var(--rec); }
+.toggle { color: var(--dim); font-size: 12.5px; white-space: nowrap; }
+.toggle:hover { color: var(--text); }
+.toggle.on { color: var(--text); }
+.toggle.on::before { content: "● "; color: var(--accent); font-size: 9px; vertical-align: 1px; }
 
-kbd {
-  display: inline-flex; align-items: center; justify-content: center;
-  height: 20px; min-width: 20px; padding: 0 5px; border-radius: 4px;
-  background: var(--muted); color: var(--muted-foreground);
-  font: 500 11px/1 -apple-system, system-ui, sans-serif;
-}
-.btn.default kbd { background: color-mix(in oklch, var(--primary-foreground) 12%, transparent); color: color-mix(in oklch, var(--primary-foreground) 70%, transparent); }
-
-/* ---------- Tabs (shadcn) ---------- */
-.tabs { display: inline-flex; height: 40px; padding: 3px; gap: 2px; border-radius: var(--radius); background: var(--muted); }
-.tab {
-  display: inline-flex; align-items: center; gap: 8px; height: 100%; padding: 0 14px;
-  border: 1px solid transparent; border-radius: calc(var(--radius) - 2px); background: none;
-  font-weight: 500; color: var(--muted-foreground); transition: all .15s;
-}
-.tab:hover { color: var(--foreground); }
-.tab.on { color: var(--foreground); background: color-mix(in oklch, var(--input) 30%, var(--background)); border-color: var(--input); box-shadow: 0 1px 2px rgb(0 0 0 / .3); }
-.tab svg { width: 16px; height: 16px; }
-
-/* ---------- Toggle group (shadcn, outline, conectado) ---------- */
-.seg { display: inline-flex; border-radius: calc(var(--radius) - 2px); box-shadow: 0 1px 2px rgb(0 0 0 / .2); }
-.seg button {
-  height: 36px; padding: 0 12px; border: 1px solid var(--input); margin-left: -1px;
-  background: color-mix(in oklch, var(--input) 20%, transparent); color: var(--muted-foreground);
-  font-size: 13px; font-weight: 500; transition: all .15s;
-}
-.seg button:first-child { margin-left: 0; border-radius: calc(var(--radius) - 2px) 0 0 calc(var(--radius) - 2px); }
-.seg button:last-child { border-radius: 0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0; }
-.seg button:hover { color: var(--foreground); background: var(--accent); }
-.seg button.on { color: var(--foreground); background: var(--accent); position: relative; z-index: 1; border-color: color-mix(in oklch, var(--foreground) 30%, transparent); }
-.seg.sm button { height: 30px; padding: 0 10px; font-size: 12px; }
-
-/* ---------- Switch (shadcn) ---------- */
-.switch {
-  position: relative; flex: none; width: 34px; height: 20px; padding: 0; border-radius: 999px;
-  border: 1px solid transparent; background: var(--input); transition: background .2s;
-  box-shadow: 0 1px 2px rgb(0 0 0 / .2);
-}
-.switch::after {
-  content: ""; position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; border-radius: 50%;
-  background: var(--foreground); transition: transform .2s cubic-bezier(.3,1.4,.6,1), background .2s;
-}
-.switch[aria-checked="true"] { background: var(--primary); }
-.switch[aria-checked="true"]::after { transform: translateX(14px); background: var(--primary-foreground); }
-.switch:disabled { opacity: .4; }
-
-/* ---------- Slider (shadcn) ---------- */
-input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 18px; background: none; margin: 0; --p: 50%; }
-input[type=range]::-webkit-slider-runnable-track {
-  height: 6px; border-radius: 999px;
-  background: linear-gradient(to right, var(--primary) var(--p), var(--muted) var(--p));
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 16px; height: 16px; margin-top: -5px; border-radius: 50%;
-  background: white; border: 1px solid var(--primary); box-shadow: 0 1px 3px rgb(0 0 0 / .4);
-  transition: box-shadow .15s;
-}
-input[type=range]:hover::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in oklch, var(--ring) 50%, transparent); }
-
-/* ---------- Tarjetas ---------- */
-.card { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: calc(var(--radius) * 1.4); }
-.muted { color: var(--muted-foreground); }
-.label { font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--muted-foreground); }
-
-/* ---------- Border Beam (Magic UI) ---------- */
-.beam {
-  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  border: 1.5px solid transparent;
-  mask: linear-gradient(transparent, transparent), linear-gradient(#000, #000);
-  mask-clip: padding-box, border-box; mask-composite: intersect;
-  opacity: 0; transition: opacity .3s;
-}
-.beam::after {
-  content: ""; position: absolute; aspect-ratio: 1; width: var(--beam-size, 90px);
-  background: linear-gradient(to left, var(--beam-from, #ffaa40), var(--beam-to, #9c40ff), transparent);
-  offset-path: rect(0 auto auto 0 round var(--beam-size, 90px));
-  animation: beam var(--beam-dur, 4s) linear infinite;
-}
-@keyframes beam { to { offset-distance: 100%; } }
-
-/* ---------- Shine Border (Magic UI) ---------- */
-.shine::before {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
-  background-image: radial-gradient(transparent, transparent, #A07CFE, #FE8FB5, #FFBE7B, transparent, transparent);
-  background-size: 300% 300%;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;
-  animation: shine 14s infinite linear; opacity: .7;
-}
-@keyframes shine { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } to { background-position: 0% 0%; } }
-
-/* ---------- Cabecera ---------- */
-header { display: flex; align-items: center; gap: 16px; }
-.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
-.logo {
-  width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
-  background: linear-gradient(135deg, #A07CFE, #FE8FB5 55%, #FFBE7B);
-  box-shadow: 0 4px 16px rgb(254 143 181 / .25);
-}
-.logo svg { width: 20px; height: 20px; color: #1a1a1a; }
-.brand h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
-.brand p { margin: 0; font-size: 12px; }
-.header-right { display: flex; align-items: center; gap: 10px; }
-
-/* ---------- Pista ---------- */
-.hint {
-  display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 14px;
-  border-radius: var(--radius); background: color-mix(in oklch, var(--card) 70%, transparent);
-  border: 1px solid var(--border); font-size: 13.5px;
-}
-.hint .pulse { width: 8px; height: 8px; border-radius: 50%; background: oklch(0.72 0.17 162); flex: none; box-shadow: 0 0 0 0 oklch(0.72 0.17 162 / .6); animation: ping 2s infinite; }
-.hint.rec .pulse { background: var(--rec); animation-duration: 1s; }
-@keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in oklch, currentColor 50%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
-.hint b { font-weight: 600; }
-
-/* ---------- Escenario ---------- */
-main { display: grid; grid-template-columns: 1fr 300px; gap: 12px; min-height: 0; }
-.stage { display: flex; flex-direction: column; padding: 14px; min-height: 0; }
-.stage-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
-.stage-head .muted { font-size: 12.5px; }
-.stage-head .right { margin-left: auto; font-size: 12px; }
-.stage.recording .beam.stage-beam { opacity: 1; --beam-from: var(--rec); --beam-to: #ff9a7a; --beam-size: 160px; --beam-dur: 3s; }
-
-.pads { position: relative; flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1fr; gap: 10px; min-height: 0; }
-.pad {
-  --c: var(--c1);
-  position: relative; overflow: hidden; border-radius: calc(var(--radius) * 1.6);
-  background: color-mix(in oklch, var(--c) 9%, var(--card));
-  border: 1px solid color-mix(in oklch, var(--c) 30%, transparent);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  transition: background .25s, border-color .25s, transform .08s;
-}
-.pad .glow {
-  position: absolute; inset: 0; opacity: 0; pointer-events: none;
-  background: radial-gradient(circle at 50% 55%, color-mix(in oklch, var(--c) 85%, white 15%), color-mix(in oklch, var(--c) 40%, transparent) 70%);
-}
-.pad.hit .glow { animation: hit .45s cubic-bezier(.2,.7,.3,1) forwards; }
-.pad.hit { animation: press .18s ease-out; }
-@keyframes hit { from { opacity: var(--hit, .9); } to { opacity: 0; } }
-@keyframes press { 30% { transform: scale(.975); } }
-.pad .name { position: relative; font-size: 22px; font-weight: 650; letter-spacing: -.015em; }
-.pad .sub { position: relative; font-size: 12px; color: var(--muted-foreground); min-height: 16px; }
-.pad .sub.tag { padding: 2px 8px; border-radius: 999px; background: color-mix(in oklch, var(--c) 22%, transparent); color: var(--foreground); }
-.pad .zone { position: absolute; top: 10px; left: 12px; font-size: 11px; color: color-mix(in oklch, var(--c) 70%, white 30%); opacity: .8; }
-.pad .actions { position: absolute; bottom: 10px; display: flex; gap: 6px; opacity: 0; transform: translateY(4px); transition: all .15s; }
-.pad:hover .actions { opacity: 1; transform: none; }
-.pad .actions .btn { height: 28px; font-size: 12px; padding: 0 10px; background: rgb(0 0 0 / .45); border-color: var(--input); backdrop-filter: blur(8px); }
-.pad .beam { --beam-from: var(--c); --beam-to: color-mix(in oklch, var(--c) 40%, white); --beam-size: 70px; --beam-dur: 3s; }
-.pad.on { background: color-mix(in oklch, var(--c) 32%, var(--card)); border-color: color-mix(in oklch, var(--c) 70%, transparent); }
-.pad.on .beam { opacity: 1; }
-.pad.on .sub { color: var(--foreground); }
-.pad.pending { animation: pending 1s ease-in-out infinite; }
-@keyframes pending { 50% { border-color: var(--c); background: color-mix(in oklch, var(--c) 20%, var(--card)); } }
-.pad.drop { border-color: white; border-style: dashed; border-width: 2px; }
-
+/* ---------- Escena del instrumento ---------- */
+.stage { position: relative; display: flex; flex-direction: column; min-height: 0; padding: 14px 20px 16px; }
+.screen { display: none; flex: 1; flex-direction: column; min-height: 0; gap: 12px; }
+.screen.on { display: flex; }
+.bar { display: flex; align-items: center; gap: 18px; min-height: 22px; white-space: nowrap; color: var(--dim); font-size: 12.5px; }
+.bar .right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+.opts { display: flex; gap: 2px; }
+.opts button { padding: 3px 8px; border-radius: 4px; color: var(--dim); font-size: 12.5px; }
+.opts button:hover { color: var(--text); }
+.opts button.on { color: var(--bg); background: var(--text); }
+.link { color: var(--dim); font-size: 12.5px; }
+.link:hover { color: var(--text); }
+.capture { display: flex; align-items: center; gap: 8px; color: var(--dim); }
+.capture i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+.capture.on { color: var(--text); }
+.capture.on i { background: var(--accent); }
+.fit { flex: 1; min-height: 0; display: grid; place-items: center; }
+/* Superficie con la forma del trackpad (≈ 1,6:1): lo que tocas ahí cae aquí. */
+.surface { position: relative; aspect-ratio: 1.6; max-width: 100%; max-height: 100%; height: 100%; }
 .fingers { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.finger { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: rgb(255 255 255 / .85); box-shadow: 0 0 18px rgb(255 255 255 / .5); transition: width .05s, height .05s; }
+.finger { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 2px solid var(--text); }
+.countin { position: absolute; inset: 0; display: none; place-items: center; z-index: 8; pointer-events: none; font: 600 140px/1 var(--mono); color: var(--text); background: rgb(17 17 16 / .6); }
+.countin.show { display: grid; }
 
-.countin {
-  position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; pointer-events: none;
-  background: rgb(0 0 0 / .45); border-radius: calc(var(--radius) * 1.6); opacity: 0; transition: opacity .2s;
-}
-.countin.show { opacity: 1; }
-.countin div { text-align: center; }
-.countin .n { font-size: 120px; font-weight: 800; line-height: 1; letter-spacing: -.04em; }
-.countin .t { margin-top: 6px; font-size: 15px; color: var(--muted-foreground); }
+/* Pads */
+.pads { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1fr; gap: 8px; }
+.pad { --c: var(--i-pads); position: relative; border-radius: 6px; background: #111110 url("assets/pad.jpg") center / 100% 100% no-repeat; overflow: hidden; }
+.pad .flash { position: absolute; inset: 0; background: url("assets/pad-pressed.jpg") center / 100% 100% no-repeat; opacity: 0; transition: opacity .35s ease-out; }
+.pad.hit .flash { transition: none; opacity: var(--v, .8); }
+.pad .name { position: absolute; left: 12px; bottom: 10px; font-size: 14px; font-weight: 500; }
+.pad .smp { position: absolute; left: 12px; bottom: 28px; font-size: 11.5px; color: var(--dim); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pad .acts { position: absolute; right: 10px; top: 8px; display: none; gap: 10px; }
+.pad:hover .acts { display: flex; }
+.playing .pad .acts { display: none !important; }
+.pad.drop, .dropping .pad { border-color: var(--text); }
 
-/* ---------- Panel lateral ---------- */
-aside { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: auto; scrollbar-width: none; }
-aside::-webkit-scrollbar { display: none; }
-aside .title { display: flex; align-items: center; gap: 8px; padding: 2px 4px 0; }
-.feature { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
-.feature .head { display: flex; align-items: center; gap: 10px; }
-.feature .ico { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: var(--muted); flex: none; }
-.feature .ico svg { width: 17px; height: 17px; }
-.feature h3 { margin: 0; font-size: 14px; font-weight: 600; }
-.feature .head .switch { margin-left: auto; }
-.feature p { margin: 0; font-size: 12px; line-height: 1.4; color: var(--muted-foreground); }
-.feature.off .body { opacity: .4; }
-.feature .body { display: flex; flex-direction: column; gap: 7px; transition: opacity .2s; }
-.meter { position: relative; height: 6px; border-radius: 999px; background: var(--muted); overflow: hidden; }
-.meter i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: inherit; background: oklch(0.72 0.17 162); transition: width .08s; }
-.meter .mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--foreground); opacity: .6; }
-.row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-.row .grow { flex: 1; }
-.badge { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: var(--muted); color: var(--muted-foreground); }
-.badge.green { background: oklch(0.72 0.17 162 / .2); color: oklch(0.85 0.12 162); }
-.lid-svg { width: 100%; height: 54px; }
-.na { font-size: 12px; color: var(--muted-foreground); font-style: italic; }
+/* Batería */
+#kitSvg { position: absolute; inset: 0; width: 100%; height: 100%; }
+#kitSvg .piece { fill: #fff; opacity: 0; pointer-events: none; }
+#kitSvg .piece.hit { animation: kit-hit .28s ease-out; }
+#kitSvg .cym.hit { animation: kit-hit .4s ease-out; }
+@keyframes kit-hit { 0% { opacity: .22; } 100% { opacity: 0; } }
+#kitSvg .piece.hit .head { fill: #fff; }
+@keyframes thump { 30% { transform: scale(.97); } }
+@keyframes wobble { 20% { transform: rotate(-4deg); } 50% { transform: rotate(2.5deg); } 80% { transform: rotate(-1deg); } }
+#kitSvg .zone { fill: transparent; cursor: pointer; }
+#kitSvg .zone:hover { fill: rgb(255 255 255 / .03); }
+.zones-visible #kitSvg .zone { stroke: var(--accent); stroke-dasharray: 6 6; stroke-width: 2; }
 
-/* ---------- Barra de transporte ---------- */
-footer.transport { display: flex; align-items: center; gap: 18px; padding: 12px 16px; flex-wrap: wrap; }
-.sep { width: 1px; align-self: stretch; background: var(--border); }
-.group { display: flex; align-items: center; gap: 8px; }
-.group .label { margin-right: 2px; }
-.play {
-  width: 48px; height: 48px; border-radius: 50%; border: none; display: grid; place-items: center;
-  background: var(--primary); color: var(--primary-foreground); transition: transform .08s, background .15s;
-  box-shadow: 0 4px 14px rgb(0 0 0 / .4);
-}
-.play:active { transform: scale(.94); }
-.play svg { width: 20px; height: 20px; }
-.btn.rec .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--rec); }
-.btn.rec.on { background: var(--rec); color: white; border-color: var(--rec); }
-.btn.rec.on .dot { background: white; animation: blink 1s steps(2) infinite; }
-@keyframes blink { 50% { opacity: .2; } }
-.bpm { min-width: 74px; text-align: center; font-variant-numeric: tabular-nums; }
-.bpm b { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
-.bpm span { font-size: 11px; color: var(--muted-foreground); margin-left: 3px; }
-.tempo input { width: 120px; }
-.beats { display: flex; gap: 6px; align-items: center; }
-.beats i { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); transition: background .06s, transform .06s; }
-.beats i.bar { margin-left: 6px; }
-.beats i.bar:first-child { margin-left: 0; }
-.beats i.now { background: var(--foreground); transform: scale(1.3); }
-.beats.rec i.now { background: var(--rec); }
-.metro-sub { display: flex; gap: 6px; }
-.chip {
-  display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 999px;
-  border: 1px solid var(--input); background: none; color: var(--muted-foreground); font-size: 12.5px; font-weight: 500; transition: all .15s;
-}
-.chip.on { background: var(--accent); color: var(--foreground); border-color: color-mix(in oklch, var(--foreground) 25%, transparent); }
-.chip svg { width: 14px; height: 14px; }
-.chip:disabled { opacity: .35; }
+/* Guitarra */
+.guitar { position: absolute; inset: 0; border-radius: 6px; overflow: hidden; background: #1a1714; }
+.guitar svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.guitar .str { stroke: #eee8da; opacity: 0; pointer-events: none; }
+.guitar .str.hit { opacity: .65; animation: ring .5s ease-out; }
+@keyframes ring { 0% { stroke: #fff; transform: translateY(1.5px); } 10% { transform: translateY(-1.5px); } 20% { transform: translateY(1px); } 30% { transform: translateY(-.7px); } 45% { transform: none; } }
+.guitar .dotf { fill: var(--i-guitar); }
+.guitar .mutex { fill: var(--dim); font: 600 44px var(--mono); }
+.chordname { position: absolute; left: 16px; top: 10px; font: 600 28px var(--mono); }
+.chordkeys { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+.ck { height: 48px; border: 1px solid var(--line); border-radius: 5px; background: var(--raise); display: flex; flex-direction: column; justify-content: space-between; padding: 5px 7px; text-align: left; }
+.ck kbd { font-size: 10px; }
+.ck span { font: 600 14px var(--mono); }
+.ck.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+.ck.on kbd { color: var(--bg); }
+.ck.row2 { grid-column: span 1; }
 
-/* ---------- Modo tocar / modo ratón ---------- */
+/* Beats */
+.grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 90px repeat(16, 1fr); grid-auto-rows: 1fr; gap: 4px; max-height: 520px; }
+.grid .rl { display: flex; align-items: center; color: var(--dim); font-size: 12.5px; padding-left: 2px; }
+.grid .rl:hover { color: var(--text); }
+.grid .rl.hit { color: var(--i-beats); }
+.cell { border-radius: 3px; background: var(--raise); border: 1px solid transparent; }
+.cell.q { margin-left: 6px; }
+.cell:hover { border-color: var(--line-2); }
+.cell.on { background: color-mix(in srgb, var(--text) calc(var(--v) * 100%), var(--raise)); }
+.cell.now { border-color: var(--accent); }
+.steps-head { display: grid; grid-template-columns: 90px repeat(16, 1fr); gap: 4px; font: 10px var(--mono); color: var(--faint); }
+.steps-head span.q { margin-left: 6px; }
+.steps-head span.now { color: var(--accent); }
+.slider { display: flex; align-items: center; gap: 8px; }
+select { -webkit-appearance: none; appearance: none; background: none; border: 0; color: var(--dim); font: inherit; font-size: 12.5px; padding: 3px 6px; border-radius: 4px; cursor: pointer; }
+select:hover { color: var(--text); background: var(--raise); }
+option { background: var(--raise); color: var(--text); }
+.keysel { display: flex; align-items: center; gap: 0; }
+.keysel select.root { color: var(--text); font-weight: 500; }
+.stepper { display: flex; align-items: center; gap: 4px; font-family: var(--mono); }
+.stepper b { min-width: 24px; text-align: center; font-weight: 500; color: var(--text); }
+.stepper button { width: 18px; height: 18px; color: var(--dim); font-size: 14px; line-height: 1; }
+.stepper button:hover { color: var(--text); }
+
+/* Bajo */
+.bassneck { position: absolute; inset: 0; border-radius: 6px; overflow: hidden; background: #1a1714; }
+.bassneck svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bassneck .bstr { stroke: #cfc6b4; }
+.bassneck .mk { fill: transparent; stroke: var(--faint); stroke-width: 2; }
+.bassneck .mk.root { fill: var(--i-bass); stroke: var(--i-bass); }
+.bassneck .mkt { fill: #b9b3a6; font: 500 22px var(--mono); }
+.bassneck .mkt.root { fill: var(--bg); }
+.bassneck .hitdot { fill: #fff; opacity: 0; }
+.bassneck .hitdot.on { animation: pop .45s ease-out; }
+@keyframes pop { 0% { opacity: .9; } 100% { opacity: 0; } }
+
+/* Teclado */
+.keyboard { position: absolute; inset: 0; display: flex; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+.kcol { flex: 1; position: relative; background: var(--raise); border-left: 1px solid var(--line); }
+.kcol:first-child { border-left: 0; }
+.kcol.root { background: #262622; }
+.kcol span { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font: 500 12px var(--mono); color: var(--dim); }
+.kcol.root span { color: var(--i-keys); }
+.kcol.on { background: color-mix(in srgb, var(--i-keys) 30%, var(--raise)); }
+.khint { position: absolute; left: 12px; top: 10px; font-size: 11.5px; color: var(--faint); pointer-events: none; z-index: 2; }
+
+/* Sampler */
+.pad.mel { --c: var(--i-sampler); }
+.pad .deg { position: absolute; right: 12px; bottom: 10px; font: 11px var(--mono); color: var(--faint); }
+.slider input { width: 90px; }
+
+/* ---------- Pistas ---------- */
+.tracks { border-top: 1px solid var(--line); background: var(--panel); padding: 8px 20px 12px; }
+.thead { display: flex; align-items: center; gap: 14px; white-space: nowrap; height: 28px; color: var(--dim); font-size: 12.5px; }
+.thead .title { color: var(--text); font-weight: 500; }
+.thead .right { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+.thead .sep { width: 1px; height: 14px; background: var(--line-2); }
+.scenes button { min-width: 24px; position: relative; }
+.scenes button.has::after { content: ""; position: absolute; left: 50%; bottom: -1px; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: var(--dim); }
+.scenes button.on.has::after { background: var(--bg); }
+.scenes button.queued { color: var(--text); box-shadow: inset 0 0 0 1px var(--accent); animation: blink 1s steps(2) infinite; }
+.chain { display: flex; align-items: center; gap: 3px; }
+.chain button { font: 500 11px var(--mono); width: 20px; height: 20px; border-radius: 3px; border: 1px solid var(--line-2); color: var(--dim); }
+.chain button:hover { color: var(--text); border-color: var(--dim); text-decoration: line-through; }
+.chain button.now { border-color: var(--accent); color: var(--text); }
+.chain .add { border-style: dashed; }
+.chain .add:hover { text-decoration: none; }
+.qs { width: 48px; }
+.lanes { position: relative; display: grid; grid-template-columns: 250px 1fr 24px; }
+.ruler { grid-column: 2; position: relative; height: 16px; font: 10px var(--mono); color: var(--faint); }
+.ruler i { position: absolute; top: 4px; bottom: 0; width: 1px; background: var(--line); }
+.ruler i.bar { background: var(--line-2); top: 0; }
+.ruler span { position: absolute; top: 0; padding-left: 4px; }
+.lane { display: contents; }
+.lane > * { height: 30px; border-top: 1px solid var(--line); }
+.lhead { display: flex; align-items: center; gap: 10px; padding-left: 8px; position: relative; cursor: pointer; }
+.lhead::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; background: transparent; }
+.lane.sel .lhead::before { background: var(--text); }
+.lane.rec .lhead::before { background: var(--rec); }
+.lhead .n { font: 11px var(--mono); color: var(--faint); width: 10px; }
+.lhead .nm { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--dim); }
+.lane.has .lhead .nm { color: var(--text); }
+.lhead .m, .lhead .so { font: 600 10px var(--mono); color: var(--faint); width: 16px; height: 16px; border-radius: 3px; }
+.lhead .m:hover, .lhead .so:hover, .lhead .more:hover { color: var(--text); }
+.lhead .m.on { background: var(--dim); color: var(--bg); }
+.lhead .so.on { background: var(--text); color: var(--bg); }
+.lhead .more { color: var(--faint); width: 18px; height: 16px; font-size: 14px; line-height: 1; letter-spacing: 1px; }
+.lhead .more.fx { color: var(--dim); }
+.lhead input { width: 56px; }
+.lwave { position: relative; background: transparent; }
+.lane.sel .lwave { background: rgb(255 255 255 / .02); }
+.lwave canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lx { display: grid; place-items: center; color: var(--faint); font-size: 14px; }
+.lx:hover { color: var(--text); }
+.playhead { position: absolute; top: 16px; bottom: 0; width: 1px; background: var(--accent); pointer-events: none; display: none; }
+
+/* ---------- Ajustes ---------- */
+.pop { position: absolute; right: 16px; top: 52px; z-index: 30; width: 300px; padding: 6px 0; background: var(--raise); border: 1px solid var(--line-2); border-radius: 8px; display: none; }
+.pop.show { display: block; }
+.pop .row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; }
+.pop .row + .row { border-top: 1px solid var(--line); }
+.pop .row div { flex: 1; }
+.pop .row small { display: block; color: var(--dim); font-size: 11.5px; margin-top: 2px; }
+.pop .row input[type=range] { width: 100%; margin-top: 6px; }
+.pop .hint { padding: 8px 14px 6px; color: var(--faint); font-size: 11.5px; line-height: 1.45; }
+.menu { left: 16px; right: auto; width: 240px; }
+.menu .item { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 7px 14px; text-align: left; }
+.menu .item:hover { background: var(--line); }
+.menu .item kbd { font-size: 10.5px; }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: 5px 0; }
+.small { width: 250px; }
+.small .row { padding: 6px 14px; }
+.small .lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); }
+.small .lbl b { font: 500 11px var(--mono); color: var(--text); }
+.small .acts { display: flex; gap: 16px; padding: 8px 14px 6px; border-top: 1px solid var(--line); margin-top: 4px; }
+.check { width: 14px; height: 14px; border: 1.5px solid var(--dim); border-radius: 3px; flex: none; }
+.check.on { background: var(--text); border-color: var(--text); }
+.meter { height: 2px; background: var(--line-2); margin-top: 6px; position: relative; }
+.meter i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--text); }
+
+/* ---------- Salida de audio / calibración ---------- */
+.outdev { color: var(--dim); font-size: 12px; font-family: var(--mono); white-space: nowrap; max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+.outdev:hover { color: var(--text); }
+.outdev.bt { color: var(--accent); }
+.pop .sec { padding: 10px 14px 4px; color: var(--faint); font-size: 11px; }
+.pop .acts { display: flex; gap: 14px; margin-top: 6px; }
+.modal { position: fixed; inset: 0; z-index: 60; display: none; place-items: center; background: rgb(10 10 9 / .82); }
+.modal.show { display: grid; }
+/* Durante la prueba, tocar el trackpad no debe pulsar ningún botón: se cancela con Esc. */
+.modal.busy .box { pointer-events: none; }
+.modal .box { width: 460px; padding: 26px 28px; background: var(--raise); border: 1px solid var(--line-2); border-radius: 10px; }
+.modal h2 { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+.modal p { margin: 0; color: var(--dim); font-size: 13.5px; line-height: 1.5; }
+.caldots { display: flex; gap: 6px; margin: 22px 0 6px; }
+.caldots i { flex: 1; height: 6px; border-radius: 2px; background: var(--line-2); }
+.caldots i.warm { background: var(--faint); }
+.caldots i.done { background: var(--text); }
+.caldots i.now { background: var(--accent); }
+.calres { min-height: 20px; margin-top: 12px; font-size: 13.5px; }
+.modal .foot { display: flex; justify-content: flex-end; gap: 18px; margin-top: 18px; }
+.modal .primary { padding: 7px 14px; border-radius: 5px; background: var(--text); color: var(--bg); font-weight: 500; }
+
 #shield { position: fixed; inset: 0; z-index: 40; display: none; }
 body.playing #shield { display: block; }
-.stage.mouse .pads > .pad { opacity: .5; filter: saturate(.7); }
-.cta {
-  position: absolute; inset: 0; z-index: 7; display: grid; place-items: center; pointer-events: none;
-}
-.cta-card {
-  pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 22px 28px; border-radius: 18px; text-align: center;
-  background: color-mix(in oklch, var(--card) 88%, transparent); border: 1px solid var(--input);
-  backdrop-filter: blur(14px); box-shadow: 0 20px 60px rgb(0 0 0 / .5);
-}
-.cta-card .btn { height: 48px; padding: 0 22px; font-size: 16px; border-radius: 12px; }
-.cta-card p { margin: 0; max-width: 340px; font-size: 13px; color: var(--muted-foreground); }
-.stage.playing .cta { display: none; }
-.live { display: none; align-items: center; gap: 8px; height: 26px; padding: 0 10px; border-radius: 999px;
-  background: oklch(0.72 0.17 162 / .16); color: oklch(0.85 0.12 162); font-size: 12px; font-weight: 600; }
-.live i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: blink 1.2s steps(2) infinite; }
-.stage.playing .live { display: inline-flex; }
-.legend { display: none; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--muted-foreground); }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
-.stage.playing .legend { display: flex; }
-
-/* ---------- Guía ---------- */
-.overlay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgb(0 0 0 / .6); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .25s; }
-.overlay.show { opacity: 1; pointer-events: auto; }
-.tour { width: 520px; padding: 26px; overflow: hidden; }
-.tour .step-n { font-size: 12px; color: var(--muted-foreground); font-weight: 500; }
-.tour h2 { margin: 6px 0 8px; font-size: 22px; letter-spacing: -.02em; }
-.tour p { margin: 0; color: var(--muted-foreground); font-size: 14.5px; line-height: 1.55; }
-.tour .ill { margin: 20px 0 4px; min-height: 120px; display: grid; place-items: center; }
-.tour .foot { display: flex; align-items: center; gap: 8px; margin-top: 20px; }
-.tour .dots { display: flex; gap: 6px; margin-right: auto; }
-.tour .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: all .2s; }
-.tour .dots i.on { width: 18px; border-radius: 3px; background: var(--foreground); }
-.minimap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; padding: 10px; border-radius: 14px; background: var(--background); border: 1px solid var(--border); }
-.minimap div { --c: var(--c1); position: relative; overflow: hidden; height: 50px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; font-weight: 600; background: color-mix(in oklch, var(--c) 14%, var(--card)); border: 1px solid color-mix(in oklch, var(--c) 35%, transparent); }
-.minimap div .glow { position: absolute; inset: 0; opacity: 0; background: var(--c); }
-.minimap div.hit .glow { animation: hit .5s ease-out forwards; }
-.minimap div span { position: relative; }
-.waiting { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--muted-foreground); }
-.waiting.done { color: oklch(0.85 0.12 162); }
-.tour-steps { display: flex; gap: 10px; width: 100%; }
-.tour-steps div { flex: 1; padding: 12px; border-radius: 12px; background: var(--background); border: 1px solid var(--border); font-size: 12.5px; color: var(--muted-foreground); }
-.tour-steps b { display: block; margin-bottom: 4px; color: var(--foreground); font-size: 13px; }
-.bigmeter { width: 100%; }
-.bigmeter .meter { height: 12px; }
 </style>
 </head>
 <body>
 <div id="app">
-  <header>
-    <div class="brand">
-      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><ellipse cx="12" cy="8" rx="8" ry="3"/><path d="M4 8v8c0 1.7 3.6 3 8 3s8-1.3 8-3V8"/><path d="M7 3l3 4M17 3l-3 4"/></svg></div>
-      <div><h1>TrackDrum</h1><p class="muted">Tu trackpad es una batería</p></div>
+  <div class="top">
+    <button class="proj" id="projBtn" title="Proyecto"><span class="nm" id="projName">Sin título</span><span class="dot" title="Cambios sin guardar"></span><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3.5l3 3 3-3"/></svg></button>
+    <nav class="screens" id="screens">
+      <button data-s="pads" title="1">Pads</button>
+      <button data-s="kit" title="2">Batería</button>
+      <button data-s="guitar" title="3">Guitarra</button>
+      <button data-s="bass" title="4">Bajo</button>
+      <button data-s="keys" title="5">Teclado</button>
+      <button data-s="sampler" title="6">Sampler</button>
+      <button data-s="beats" title="7">Beats</button>
+    </nav>
+    <span class="notice" id="notice"></span>
+    <div class="transport">
+      <span class="barpos" id="barpos"></span>
+      <div class="beatdots" id="beatdots"><i></i><i></i><i></i><i></i></div>
+      <button class="tbtn" id="playBtn" title="Reproducir / parar (espacio)"></button>
+      <button class="tbtn" id="recBtn" title="Grabar en la pista seleccionada (R)"><span class="dot"></span></button>
+      <div class="tempo" id="tempo">
+        <button id="bpmDown" title="Más lento (↓)">−</button><b id="bpmVal">100</b><span>BPM</span><button id="bpmUp" title="Más rápido (↑)">+</button>
+      </div>
+      <button class="toggle" id="metroBtn" title="Metrónomo (M)">Metrónomo</button>
+      <button class="outdev" id="outDev" title="Salida de audio y su retraso. Clic para calibrar"></button>
+      <button class="tbtn" id="setBtn" title="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
-    <div class="tabs" role="tablist">
-      <button class="tab" data-mode="drums" title="Toca la batería con el trackpad">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="9" rx="8" ry="3"/><path d="M4 9v6c0 1.7 3.6 3 8 3s8-1.3 8-3V9"/></svg>
-        Batería</button>
-      <button class="tab" data-mode="loops" title="Lanza ritmos y melodías que se repiten">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
-        Loops</button>
-    </div>
-    <div class="header-right">
-      <span class="label">Sonido</span>
-      <div class="seg" id="kits"></div>
-      <button class="btn outline icon" id="helpBtn" title="Ver la guía otra vez">?</button>
-    </div>
-  </header>
+  </div>
 
-  <div class="hint" id="hint"><span class="pulse"></span><span id="hintText"></span></div>
+  <div class="stage" id="stage">
+    <div class="countin" id="countin"></div>
 
-  <main>
-    <section class="stage card shine" id="stage">
-      <div class="beam stage-beam"></div>
-      <div class="stage-head">
-        <span class="label" id="stageTitle">Tu trackpad</span>
-        <span class="muted" id="stageSub"></span>
-        <span class="right muted" id="stageRight"></span>
-        <span class="live" id="live"><i></i>Tocando · pulsa <kbd>Esc</kbd> para usar el ratón</span>
+    <!-- PADS -->
+    <section class="screen" data-s="pads">
+      <div class="bar">
+        <div class="opts kits"></div>
+        <div class="right"><span class="capture"><i></i><span></span></span></div>
       </div>
-      <div class="pads" id="pads">
-        <div class="fingers" id="fingers"></div>
-        <div class="cta"><div class="cta-card">
-          <button class="btn default" id="playModeBtn">Empezar a tocar <kbd>⏎</kbd></button>
-          <p>Mientras tocas, el trackpad es la batería y el ratón se bloquea. Pulsa <kbd>Esc</kbd> cuando quieras volver a usar el ratón.</p>
-        </div></div>
-        <div class="countin" id="countin"><div><div class="n" id="countN">4</div><div class="t">Prepárate para tocar…</div></div></div>
-      </div>
-      <div class="legend">
-        <span><kbd>Espacio</kbd> reproducir / parar</span>
-        <span><kbd>R</kbd> grabar</span>
-        <span><kbd>Z</kbd> deshacer</span>
-        <span><kbd>C</kbd> borrar</span>
-        <span><kbd>M</kbd> metrónomo</span>
-        <span><kbd>↑</kbd><kbd>↓</kbd> tempo</span>
-        <span><kbd>Tab</kbd> batería / loops</span>
-        <span><kbd>1</kbd>–<kbd>4</kbd> sonido</span>
-        <span><kbd>Esc</kbd> volver al ratón</span>
-      </div>
+      <div class="fit"><div class="surface" id="padSurface">
+        <div class="pads" id="pads"></div>
+        <div class="fingers"></div>
+      </div></div>
     </section>
 
-    <aside>
-      <div class="title"><span class="label">Trucos del Mac</span></div>
+    <!-- BATERÍA -->
+    <section class="screen" data-s="kit">
+      <div class="bar">
+        <div class="opts kits"></div>
+        <button class="link" id="zonesBtn" title="Muestra qué parte del trackpad toca cada pieza">Ver zonas</button>
+        <div class="right"><span class="capture"><i></i><span></span></span></div>
+      </div>
+      <div class="fit"><div class="surface" id="kitSurface">
+        <svg id="kitSvg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid meet">
+          <image href="assets/drums.jpg" width="1600" height="1000" preserveAspectRatio="none"/>
+          <!-- Zonas de golpe (las mismas que usa el trackpad) -->
+          <g aria-hidden="true">
+            <ellipse class="piece" data-slot="3" cx="432" cy="210" rx="210" ry="110"/>
+            <ellipse class="piece" data-slot="11" cx="1264" cy="300" rx="220" ry="120"/>
+            <ellipse class="piece" data-slot="0" cx="176" cy="480" rx="160" ry="120"/>
+            <ellipse class="piece" data-slot="1" cx="656" cy="430" rx="115" ry="95"/>
+            <ellipse class="piece" data-slot="2" cx="944" cy="430" rx="115" ry="95"/>
+            <ellipse class="piece" data-slot="7" cx="800" cy="490" rx="45" ry="40"/>
+            <ellipse class="piece" data-slot="4" cx="800" cy="770" rx="210" ry="190"/>
+            <ellipse class="piece" data-slot="5" cx="400" cy="640" rx="150" ry="100"/>
+            <ellipse class="piece" data-slot="10" cx="1200" cy="660" rx="150" ry="140"/>
+          </g>
+          <g id="zones">
+            <ellipse class="zone" data-slot="3" cx="432" cy="210" rx="210" ry="110"/>
+            <ellipse class="zone" data-slot="11" cx="1264" cy="300" rx="220" ry="120"/>
+            <ellipse class="zone" data-slot="0" cx="176" cy="480" rx="160" ry="120"/>
+            <ellipse class="zone" data-slot="1" cx="656" cy="430" rx="115" ry="95"/>
+            <ellipse class="zone" data-slot="2" cx="944" cy="430" rx="115" ry="95"/>
+            <ellipse class="zone" data-slot="7" cx="800" cy="490" rx="45" ry="40"/>
+            <ellipse class="zone" data-slot="4" cx="800" cy="770" rx="210" ry="190"/>
+            <ellipse class="zone" data-slot="5" cx="400" cy="640" rx="150" ry="100"/>
+            <ellipse class="zone" data-slot="10" cx="1200" cy="660" rx="150" ry="140"/>
+          </g>
+        </svg>
+        <div class="fingers"></div>
+      </div></div>
+    </section>
 
-      <div class="card feature" id="fVel">
-        <div class="head">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8a8 8 0 0 0 16 0v-2a2 2 0 0 0-4 0"/></svg></div>
-          <h3>Fuerza del golpe</h3>
-          <button class="switch" role="switch" data-msg="velocity" title="Activar o desactivar"></button>
+    <!-- GUITARRA -->
+    <section class="screen" data-s="guitar">
+      <div class="bar">
+        <div class="opts" id="tones"><button data-v="0">Acústica</button><button data-v="1">Eléctrica</button><button data-v="2">Distorsión</button></div>
+        <button class="toggle" id="holdBtn" title="El acorde se queda aunque sueltes la tecla">Mantener acorde</button>
+        <div class="right"><span class="capture"><i></i><span></span></span></div>
+      </div>
+      <div class="fit"><div class="surface" id="gtrSurface">
+        <div class="guitar" id="guitar">
+          <svg id="gtrSvg" viewBox="0 0 1600 1000" preserveAspectRatio="none"></svg>
+          <div class="chordname" id="chordName">—</div>
         </div>
-        <div class="body">
-          <p>Cuanto más fuerte golpeas, más alto suena.</p>
-          <div class="row"><span class="muted">Último golpe</span><div class="meter grow"><i id="velBar"></i></div><span id="velVal" style="min-width:32px;text-align:right">–</span></div>
+        <div class="fingers"></div>
+      </div></div>
+      <div class="chordkeys" id="chordKeys"></div>
+    </section>
+
+    <!-- BAJO -->
+    <section class="screen" data-s="bass">
+      <div class="bar">
+        <div class="opts" id="bassTones"><button data-v="0">Dedos</button><button data-v="1">Púa</button><button data-v="2">Sub</button></div>
+        <button class="toggle" id="bassLift" title="La nota se corta al levantar el dedo">Apagar al soltar</button>
+        <span class="keysel"></span>
+        <div class="right"><span class="capture"><i></i><span></span></span></div>
+      </div>
+      <div class="fit"><div class="surface" id="bassSurface">
+        <div class="bassneck" id="bassNeck"><svg id="bassSvg" viewBox="0 0 1600 1000" preserveAspectRatio="none"></svg></div>
+        <div class="fingers"></div>
+      </div></div>
+    </section>
+
+    <!-- TECLADO -->
+    <section class="screen" data-s="keys">
+      <div class="bar">
+        <div class="opts" id="patches"></div>
+        <span class="stepper" title="Octava"><button id="octDown">−</button><b id="octVal">0</b><button id="octUp">+</button></span>
+        <span class="keysel"></span>
+        <div class="right"><span class="capture"><i></i><span></span></span></div>
+      </div>
+      <div class="fit"><div class="surface" id="keysSurface">
+        <div class="keyboard" id="keyboard"></div>
+        <div class="khint">↑ más brillo · aprieta para vibrato</div>
+        <div class="fingers"></div>
+      </div></div>
+    </section>
+
+    <!-- SAMPLER -->
+    <section class="screen" data-s="sampler">
+      <div class="bar">
+        <span id="smpName" style="color:var(--text)"></span>
+        <button class="link" id="smpPick" title="También puedes arrastrar un archivo de audio aquí">Cambiar sonido</button>
+        <button class="link" id="smpReset">Original</button>
+        <span class="stepper" title="Afinar el sonido en semitonos"><button id="tuneDown">−</button><b id="tuneVal">0</b><button id="tuneUp">+</button></span>
+        <span class="keysel"></span>
+        <div class="right"><span class="capture"><i></i><span></span></span></div>
+      </div>
+      <div class="fit"><div class="surface" id="smpSurface">
+        <div class="pads" id="melPads"></div>
+        <div class="fingers"></div>
+      </div></div>
+    </section>
+
+    <!-- BEATS -->
+    <section class="screen" data-s="beats">
+      <div class="bar">
+        <div class="opts" id="presets"></div>
+        <div class="right">
+          <label class="slider">Swing <input type="range" id="swing" min="0" max="50" step="1"></label>
+          <label class="slider">Volumen <input type="range" id="beatsVol" min="0" max="120" step="1"></label>
+          <button class="toggle" id="beatsOn" title="Que el ritmo suene al reproducir">Sonando</button>
+          <button class="link" id="bounceBtn" title="Convierte este ritmo en una pista de audio">Pasar a pista →</button>
         </div>
       </div>
+      <div class="steps-head" id="stepsHead"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+  </div>
 
-      <div class="card feature" id="fLid">
-        <div class="head">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg></div>
-          <h3>Tapa = pedal del charles</h3>
-          <button class="switch" role="switch" data-msg="lid" title="Activar o desactivar"></button>
-        </div>
-        <div class="body" id="lidBody">
-          <p>Echa la pantalla un poco hacia atrás: el charles suena abierto. Al volver, se cierra.</p>
-          <svg class="lid-svg" viewBox="0 0 200 70">
-            <line x1="40" y1="60" x2="160" y2="60" stroke="currentColor" stroke-opacity=".5" stroke-width="4" stroke-linecap="round"/>
-            <line id="lidThreshold" x1="40" y1="60" x2="40" y2="5" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="3 3"/>
-            <line id="lidScreen" x1="40" y1="60" x2="40" y2="5" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-            <circle cx="40" cy="60" r="3" fill="currentColor"/>
-            <text id="lidAngle" x="190" y="30" text-anchor="end" font-size="22" font-weight="700" fill="currentColor">–</text>
-            <text x="190" y="48" text-anchor="end" font-size="10" fill="currentColor" fill-opacity=".5">ángulo de la tapa</text>
-          </svg>
-          <div class="row"><span class="badge" id="lidState">cerrado</span><span class="grow"></span>
-            <button class="btn outline sm" data-msg="lidCalibrate" title="Toma la posición actual de la pantalla como punto de partida">Usar posición actual</button></div>
-        </div>
+  <div class="tracks">
+    <div class="thead">
+      <span class="title">Pistas</span>
+      <div class="opts scenes" id="scenes" title="Escenas: cada una es un loop con sus propias tomas y su ritmo"></div>
+      <button class="toggle" id="songBtn" title="Encadena escenas: al acabar cada loop pasa a la siguiente">Canción</button>
+      <div class="chain" id="chain"></div>
+      <div class="right">
+        <span>Cuantizar</span>
+        <div class="opts" id="quant" title="Ajusta a la rejilla los golpes que grabes (pads, batería y sampler)"><button data-v="0">No</button><button data-v="1">1/16</button><button data-v="2">1/8</button></div>
+        <input type="range" class="qs" id="quantStr" min="0" max="100" step="5" title="Fuerza de la cuantización">
+        <button class="toggle" id="replaceBtn" title="La toma nueva sustituye lo que había en la pista (si no, se suma)">Reemplazar</button>
+        <span class="sep"></span>
+        <div class="opts" id="bars" title="Compases del loop"><button data-v="1">1</button><button data-v="2">2</button><button data-v="4">4</button><button data-v="8">8</button></div>
+        <span>comp.</span>
+        <span class="sep"></span>
+        <button class="link" id="fxBtn" title="Reverb, delay y compresor">Efectos</button>
+        <button class="link" id="undoBtn" title="Deshace la última toma (⌘Z)">Deshacer</button>
       </div>
-
-      <div class="card feature" id="fKick">
-        <div class="head">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12h3l3-8 4 16 3-8h7"/></svg></div>
-          <h3>Golpe = bombo</h3>
-          <button class="switch" role="switch" data-msg="kick" title="Activar o desactivar"></button>
-        </div>
-        <div class="body" id="kickBody">
-          <p>Un golpecito con la palma en el reposamuñecas hace sonar el bombo.</p>
-          <div class="row"><span class="muted">Vibración</span><div class="meter grow"><i id="kickBar"></i><span class="mark" id="kickMark"></span></div><span class="muted" id="kickVal" style="min-width:44px;text-align:right"></span></div>
-          <div class="row"><span class="muted">Sensibilidad</span>
-            <input type="range" id="kickSens" class="grow" min="0" max="100" step="1" title="Más sensibilidad = golpes más flojos cuentan"></div>
-        </div>
-      </div>
-    </aside>
-  </main>
-
-  <footer class="transport card">
-    <div class="group">
-      <button class="play" id="playBtn" title="Reproducir / parar (Espacio)"></button>
-      <button class="btn outline rec" id="recBtn" title="Grabar lo que toques (R)"><span class="dot"></span><span id="recText">Grabar</span><kbd>R</kbd></button>
-      <button class="btn ghost icon" id="undoBtn" title="Quitar la última capa grabada (Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
-      <button class="btn ghost icon" id="clearBtn" title="Borrar todo lo grabado (C)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
     </div>
-    <div class="beats" id="beats"></div>
-    <div class="sep"></div>
-    <div class="group tempo">
-      <span class="label">Tempo</span>
-      <button class="btn outline icon sm" id="bpmDown" title="Más lento (↓)">−</button>
-      <div class="bpm"><b id="bpmVal">100</b><span>BPM</span></div>
-      <button class="btn outline icon sm" id="bpmUp" title="Más rápido (↑)">+</button>
-      <input type="range" id="bpmSlider" min="50" max="220" step="1">
-      <button class="btn ghost sm" id="tapBtn" title="Toca este botón al ritmo que quieras">Tap</button>
-    </div>
-    <div class="sep"></div>
-    <div class="group">
-      <span class="label">Metrónomo</span>
-      <button class="switch" role="switch" id="metroSwitch" title="Encender o apagar el metrónomo (M)"></button>
-      <div class="metro-sub">
-        <button class="chip" id="metroSound" title="Que el metrónomo suene"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>Sonido</button>
-        <button class="chip" id="metroHaptic" title="Que el metrónomo vibre en el trackpad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="4" width="10" height="16" rx="2"/><path d="M3 9v6M21 9v6"/></svg>Vibración</button>
-      </div>
-    </div>
-    <div class="sep"></div>
-    <div class="group">
-      <span class="label" title="Cada cuánto se repite lo que grabas">Repetir cada</span>
-      <div class="seg sm" id="bars">
-        <button data-v="1">1 compás</button><button data-v="2">2</button><button data-v="4">4</button>
-      </div>
-      <button class="chip" id="quantBtn" title="Corrige un poco tus golpes para que caigan justo a ritmo">Ajustar al ritmo</button>
-    </div>
-  </footer>
-</div>
-
-<div id="shield"></div>
-<div class="overlay" id="tourOverlay">
-  <div class="card tour shine">
-    <div class="step-n" id="tourN"></div>
-    <h2 id="tourTitle"></h2>
-    <p id="tourBody"></p>
-    <div class="ill" id="tourIll"></div>
-    <div class="foot">
-      <div class="dots" id="tourDots"></div>
-      <button class="btn ghost" id="tourSkip">Saltar</button>
-      <button class="btn outline" id="tourBack">Atrás</button>
-      <button class="btn default" id="tourNext">Siguiente</button>
+    <div class="lanes" id="lanes">
+      <div></div><div class="ruler" id="ruler"></div><div></div>
+      <div class="playhead" id="playhead"></div>
     </div>
   </div>
 </div>
+
+<div class="pop menu" id="projMenu">
+  <button class="item" data-act="newProject">Nuevo<kbd>⌘N</kbd></button>
+  <button class="item" data-act="open">Abrir…<kbd>⌘O</kbd></button>
+  <button class="item" data-act="save">Guardar<kbd>⌘S</kbd></button>
+  <button class="item" data-act="saveAs">Guardar como…<kbd>⇧⌘S</kbd></button>
+  <hr>
+  <button class="item" data-act="export">Exportar mezcla (WAV)<kbd>⌘E</kbd></button>
+  <button class="item" data-act="exportStems">Exportar pistas por separado</button>
+</div>
+<div class="pop small" id="fxPop">
+  <div class="sec">Reverb</div>
+  <div class="row"><div><div class="lbl">Tamaño de la sala<b id="fxRevVal"></b></div><input type="range" id="fxRev" min="0" max="100" step="1"></div></div>
+  <div class="sec">Delay</div>
+  <div class="row"><div class="opts" id="fxDiv"><button data-v="2">1/8</button><button data-v="3">1/8 ·</button><button data-v="4">1/4</button></div></div>
+  <div class="row"><div><div class="lbl">Repeticiones<b id="fxFbVal"></b></div><input type="range" id="fxFb" min="0" max="85" step="1"></div></div>
+  <div class="sec">Compresor</div>
+  <div class="row" data-fx="comp"><span class="check"></span><div><div class="lbl">Fuerza<b id="fxCompVal"></b></div><input type="range" id="fxComp" min="0" max="100" step="1"></div></div>
+  <div class="hint">Cuánto manda cada pista a la reverb y al delay se ajusta en su ⋯. Lo que tocas en directo usa los de la pista seleccionada.</div>
+</div>
+<div class="pop small" id="lanePop">
+  <div class="sec" id="lpTitle"></div>
+  <div class="row"><div><div class="lbl">Paneo<b id="lpPanVal"></b></div><input type="range" id="lpPan" min="-100" max="100" step="1" title="Doble clic: al centro"></div></div>
+  <div class="row"><div><div class="lbl">Reverb<b id="lpRevVal"></b></div><input type="range" id="lpRev" min="0" max="100" step="1"></div></div>
+  <div class="row"><div><div class="lbl">Delay<b id="lpDlyVal"></b></div><input type="range" id="lpDly" min="0" max="100" step="1"></div></div>
+  <div class="acts"><button class="link" id="lpDup">Duplicar</button><button class="link" id="lpClear">Vaciar</button></div>
+</div>
+<div class="pop" id="settings">
+  <div class="row" data-set="velocity"><span class="check"></span><div>Fuerza del golpe<small>Golpear más fuerte suena más alto</small></div></div>
+  <div class="row" data-set="lid"><span class="check"></span><div>Tapa = pedal del charles<small id="lidInfo">Echa la pantalla hacia atrás para abrirlo</small></div></div>
+  <div class="row" data-set="kick"><span class="check"></span><div>Golpe en el chasis = bombo<small id="kickInfo"></small>
+    <div class="meter"><i id="kickLevel"></i></div>
+    <input type="range" id="kickSens" min="0" max="100" step="1" title="Sensibilidad">
+    <div class="acts"><button class="link" id="kickInstall">Activar</button><button class="link" id="kickUninstall">Quitar ayudante</button></div></div></div>
+  <div class="row" data-set="metroHaptic"><span class="check"></span><div>El metrónomo vibra<small>Notas el pulso en el trackpad</small></div></div>
+  <div class="row" data-set="metroSound"><span class="check"></span><div>El metrónomo suena</div></div>
+  <div class="row" data-set="hapticPlay"><span class="check"></span><div>Vibración al tocar<small>Cada golpe, cuerda o cambio de nota se nota en el trackpad</small></div></div>
+  <div class="row" data-set="midi"><span class="check"></span><div>Salida MIDI<small id="midiInfo">Aparece como «TrackDrum» en GarageBand, Logic…</small></div></div>
+  <div class="sec">Salida de audio</div>
+  <div class="row"><div><span id="devName"></span><small id="devLat"></small>
+    <div class="acts"><button class="link" id="calOpen">Calibrar retraso</button><button class="link" id="calReset">Quitar calibración</button></div></div></div>
+  <div class="row" data-set="instant"><span class="check"></span><div>Respuesta inmediata<small id="instantInfo">Suena en cuanto rozas el trackpad (unos 10 ms antes)</small></div></div>
+  <div class="sec">Idioma</div>
+  <div class="row"><div class="opts" id="langOpts"><button data-v="auto">Automático</button><button data-v="en">English</button><button data-v="es">Español</button></div></div>
+</div>
+<div class="modal" id="calModal"><div class="box">
+  <h2>Prueba de retraso</h2>
+  <p>Vas a oír 16 clics. Toca el trackpad (o pulsa espacio) <b>justo cuando oigas cada uno</b>, no cuando lo veas. Los 4 primeros son para coger el ritmo. Así se calcula cuánto tardan en llegarte los cascos y las grabaciones caen en su sitio.</p>
+  <div class="caldots" id="calDots"></div>
+  <div class="calres" id="calRes"></div>
+  <div class="foot"><button class="link" id="calClose">Cerrar</button><button class="primary" id="calGo">Empezar</button></div>
+</div></div>
+<div id="shield"></div>
 
 <script>
 "use strict";
@@ -508,288 +538,744 @@ const send = (a, extra = {}) => { try { window.webkit.messageHandlers.td.postMes
 window.onerror = (m, src, line) => send("jsError", { m: String(m), line });
 
 const PAD_NAMES = ["Charles", "Tom alto", "Tom bajo", "Platillo", "Bombo", "Caja", "Clap", "Cencerro"];
-const ICONS = {
-  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>',
-  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+const WAVE_COLOR = { "Pads": "#e3a73b", "Batería": "#d9603f", "Guitarra": "#4fae8f", "Beats": "#8494e0", "Bajo": "#a983d2", "Teclado": "#4fa3c7", "Sampler": "#d4789b" };
+const MODES = ["pads", "kit", "guitar", "bass", "keys", "sampler", "beats"];
+const NOTE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const SCENES = ["A", "B", "C", "D"];
+const noteName = m => NOTE[((m % 12) + 12) % 12];
+const BASS_Y = [0.125, 0.375, 0.625, 0.875]; // centro de cada cuerda (0 = Mi grave, arriba)
+const BEAT_ROW_SLOTS = [4, 5, 6, 0, 8, 1, 2, 11];
+const CHORD_CODES = ["KeyA","KeyS","KeyD","KeyF","KeyG","KeyH","KeyJ","KeyK","KeyL","Semicolon","KeyZ","KeyX","KeyC","KeyV","KeyB","KeyN"];
+const CHORD_LABELS = ["A","S","D","F","G","H","J","K","L","Ñ","Z","X","C","V","B","N"];
+const STRING_Y = [0.2, 0.32, 0.44, 0.56, 0.68, 0.8]; // igual que en la app (0 = Mi grave)
+const ICON = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>',
 };
 
-let S = null;           // último estado del motor
-let built = false;
-const els = {};
+// ---------- Idioma ----------
+// La interfaz está escrita en español; en inglés cada texto se busca aquí.
+let LANG = "es";
+const EN = {
+  // Pantallas e instrumentos
+  "Batería": "Drums", "Guitarra": "Guitar", "Bajo": "Bass", "Teclado": "Keys", "Audio": "Audio",
+  "Acústico": "Acoustic", "Acústica": "Acoustic", "Eléctrica": "Electric", "Distorsión": "Distortion",
+  "Dedos": "Fingers", "Púa": "Pick",
+  "Charles": "Hi-hat", "Tom alto": "High tom", "Tom bajo": "Low tom", "Platillo": "Cymbal", "Bombo": "Kick",
+  "Caja": "Snare", "Cencerro": "Cowbell", "Abierto": "Open",
+  "Vacío": "Empty", "Básico": "Basic", "Reggaetón": "Reggaeton",
+  "Mayor": "Major", "Menor": "Minor", "Pentatónica": "Pentatonic", "Pentatónica menor": "Minor pentatonic",
+  "Dórica": "Dorian", "Cromática": "Chromatic", "Piano eléctrico": "Electric piano",
+  // Barra superior
+  "Reproducir / parar (espacio)": "Play / stop (space)", "Grabar en la pista seleccionada (R)": "Record on the selected track (R)",
+  "Más lento (↓)": "Slower (↓)", "Más rápido (↑)": "Faster (↑)", "Metrónomo (M)": "Metronome (M)", "Metrónomo": "Metronome",
+  "Salida de audio y su retraso. Clic para calibrar": "Audio output and its delay. Click to calibrate", "Ajustes": "Settings",
+  "Hay audio grabado: el tempo queda fijo": "There's recorded audio: the tempo is locked",
+  "Salida": "Output", "Salida de audio y su retraso": "Audio output and its delay",
+  "Cascos inalámbricos: calibra el retraso para que las grabaciones cuadren": "Wireless headphones: calibrate the delay so recordings line up",
+  "Tocando con el trackpad · Esc para soltar": "Playing with the trackpad · Esc to release",
+  "Pulsa ⏎ para tocar con el trackpad": "Press ⏎ to play with the trackpad",
+  // Pads y batería
+  "Cambiar sonido": "Change sound", "Original": "Original", "Ver zonas": "Show zones",
+  "Muestra qué parte del trackpad toca cada pieza": "Shows which part of the trackpad plays each piece",
+  // Guitarra y bajo
+  "Mantener acorde": "Hold chord", "El acorde se queda aunque sueltes la tecla": "The chord stays even after you release the key",
+  "Al aire": "Open strings", "Apagar al soltar": "Mute on release", "La nota se corta al levantar el dedo": "The note stops when you lift your finger",
+  "Tónica": "Root", "Escala": "Scale",
+  // Teclado y sampler
+  "Octava": "Octave", "↑ más brillo · aprieta para vibrato": "↑ brighter · press harder for vibrato",
+  "También puedes arrastrar un archivo de audio aquí": "You can also drag an audio file here",
+  "Afinar el sonido en semitonos": "Tune the sound in semitones",
+  // Beats
+  "Volumen": "Volume", "Sonando": "On", "En silencio": "Muted", "Que el ritmo suene al reproducir": "Play the beat during playback",
+  "Pasar a pista →": "Send to track →", "Convierte este ritmo en una pista de audio": "Turns this beat into an audio track",
+  // Pistas
+  "Pistas": "Tracks", "Escenas: cada una es un loop con sus propias tomas y su ritmo": "Scenes: each one is a loop with its own takes and beat",
+  "Canción": "Song", "Encadena escenas: al acabar cada loop pasa a la siguiente": "Chains scenes: when each loop ends, it moves to the next",
+  "Cuantizar": "Quantize", "No": "Off", "Ajusta a la rejilla los golpes que grabes (pads, batería y sampler)": "Snaps recorded hits to the grid (pads, drums and sampler)",
+  "Fuerza de la cuantización": "Quantize strength", "Fuerza: {0}%": "Strength: {0}%",
+  "Reemplazar": "Replace", "La toma nueva sustituye lo que había en la pista (si no, se suma)": "The new take replaces what was on the track (otherwise it's layered)",
+  "Compases del loop": "Loop length in bars", "comp.": "bars", "Efectos": "Effects", "Reverb, delay y compresor": "Reverb, delay and compressor",
+  "Deshacer": "Undo", "Deshace la última toma (⌘Z)": "Undoes the last take (⌘Z)",
+  "Quitar": "Remove", "Añadir la escena {0} al final": "Add scene {0} at the end",
+  "Silenciar": "Mute", "Solo: solo suenan las pistas con S": "Solo: only tracks with S play", "Paneo, efectos y más": "Pan, effects and more",
+  "Vaciar pista": "Clear track", "Vacía": "Empty",
+  // Menú de proyecto
+  "Nuevo": "New", "Abrir…": "Open…", "Guardar": "Save", "Guardar como…": "Save As…",
+  "Exportar mezcla (WAV)": "Export mix (WAV)", "Exportar pistas por separado": "Export separate tracks",
+  // Efectos y pista
+  "Tamaño de la sala": "Room size", "Repeticiones": "Feedback", "Compresor": "Compressor", "Fuerza": "Amount", "apagado": "off",
+  "Cuánto manda cada pista a la reverb y al delay se ajusta en su ⋯. Lo que tocas en directo usa los de la pista seleccionada.":
+    "How much each track sends to the reverb and delay is set in its ⋯. What you play live uses the selected track's sends.",
+  "Pista {0}": "Track {0}", "Paneo": "Pan", "Doble clic: al centro": "Double-click: center", "centro": "center", "izq {0}": "L {0}", "der {0}": "R {0}",
+  "Duplicar": "Duplicate", "Vaciar": "Clear",
+  // Ajustes
+  "Fuerza del golpe": "Hit strength", "Golpear más fuerte suena más alto": "Hitting harder plays louder",
+  "Tapa = pedal del charles": "Lid = hi-hat pedal", "Echa la pantalla hacia atrás para abrirlo": "Tilt the screen back to open it",
+  "Echa la pantalla hacia atrás para abrirlo · {0}°": "Tilt the screen back to open it · {0}°",
+  "Sensor no disponible en este Mac": "Sensor not available on this Mac",
+  "Golpe en el chasis = bombo": "Tap the chassis = kick", "Sensibilidad": "Sensitivity",
+  "Activar": "Enable", "Quitar ayudante": "Remove helper", "Reinstalar": "Reinstall", "Activar (pide contraseña una vez)": "Enable (asks for your password once)",
+  "Esperando la contraseña…": "Waiting for the password…", "Un golpecito en el reposamuñecas": "A light tap on the palm rest",
+  "Necesita un ayudante con permiso de administrador (se instala una vez)": "Needs a helper with administrator permission (installed once)",
+  "El ayudante no responde. Prueba a reinstalarlo.": "The helper isn't responding. Try reinstalling it.",
+  "El metrónomo vibra": "Metronome vibrates", "Notas el pulso en el trackpad": "Feel the beat on the trackpad",
+  "El metrónomo suena": "Metronome is audible", "Vibración al tocar": "Haptics when playing",
+  "Cada golpe, cuerda o cambio de nota se nota en el trackpad": "Every hit, string or note change is felt on the trackpad",
+  "Salida MIDI": "MIDI output", "Aparece como «TrackDrum» en GarageBand, Logic…": "Shows up as “TrackDrum” in GarageBand, Logic…",
+  "No se pudo crear la salida MIDI": "Couldn't create the MIDI output",
+  "Salida de audio": "Audio output", "Calibrar retraso": "Calibrate delay", "Quitar calibración": "Remove calibration",
+  "Retraso calibrado: {0} ms (el sistema dice {1} ms)": "Calibrated delay: {0} ms (system says {1} ms)",
+  "Retraso según el sistema: {0} ms · sin calibrar": "Delay reported by the system: {0} ms · not calibrated",
+  "Respuesta inmediata": "Instant response", "Suena en cuanto rozas el trackpad (unos 10 ms antes)": "Plays as soon as you touch the trackpad (about 10 ms sooner)",
+  "Activada sola porque usas Bluetooth": "Turned on automatically because you're using Bluetooth",
+  "Idioma": "Language", "Automático": "Automatic",
+  "Proyecto": "Project", "Cambios sin guardar": "Unsaved changes",
+  // Calibración
+  "Prueba de retraso": "Delay test",
+  "Vas a oír 16 clics. Toca el trackpad (o pulsa espacio)": "You'll hear 16 clicks. Tap the trackpad (or press space)",
+  "justo cuando oigas cada uno": "right when you hear each one",
+  ", no cuando lo veas. Los 4 primeros son para coger el ritmo. Así se calcula cuánto tardan en llegarte los cascos y las grabaciones caen en su sitio.":
+    ", not when you see it. The first 4 are to get the rhythm. This measures how long your headphones take, so recordings land in the right place.",
+  "Escuchando… {0} toques": "Listening… {0} taps", "Calibrado: {0} ms.": "Calibrated: {0} ms.",
+  "Esc para cancelar": "Esc to cancel", "Cerrar": "Close", "Repetir": "Repeat", "Empezar": "Start",
+};
+/// Traduce un texto escrito en español. Los {0}, {1}… se rellenan con los argumentos.
+function T(es, ...args) {
+  let t = LANG === "en" && EN[es] !== undefined ? EN[es] : es;
+  args.forEach((a, i) => t = t.replace("{" + i + "}", a));
+  return t;
+}
+/// Traduce el texto fijo de la página (y los títulos). Se guarda el original para poder volver.
+const ORIG = new WeakMap();
+function translateDom() {
+  document.documentElement.lang = LANG;
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n; (n = w.nextNode());) {
+    if (n.parentNode.closest("script,style,svg")) continue;
+    if (!ORIG.has(n)) ORIG.set(n, n.nodeValue);
+    const o = ORIG.get(n), k = o.trim();
+    if (!k) continue;
+    const v = o.replace(k, T(k));
+    if (n.nodeValue !== v) n.nodeValue = v;
+  }
+  $$("[title]").forEach(el => {
+    if (el.dataset.t0 === undefined) el.dataset.t0 = el.title;
+    el.title = T(el.dataset.t0);
+  });
+}
+
+let S = null, built = false, translated = false;
+const waves = {};
+const held = []; // teclas de acorde pulsadas, la última manda
 
 // ---------- Construcción ----------
 function build(s) {
+  // Kits
+  $$(".kits").forEach(box => s.kits.forEach((k, i) => {
+    const b = document.createElement("button"); b.textContent = k; b.dataset.v = i;
+    b.onclick = () => send("kit", { v: i }); box.appendChild(b);
+  }));
+
+  // Pads
   const pads = $("#pads");
   for (let i = 0; i < 8; i++) {
     const p = document.createElement("div");
-    p.className = "pad";
-    p.dataset.pad = i;
-    p.style.setProperty("--c", `var(--c${i + 1})`);
-    p.innerHTML = `<div class="glow"></div><div class="beam"></div><span class="zone"></span>
-      <div class="name"></div><div class="sub"></div>
-      <div class="actions"><button class="btn sm" data-act="pick" title="Elegir un archivo de audio para esta zona">Cambiar sonido</button>
-      <button class="btn sm" data-act="remove" title="Volver al sonido original">Original</button></div>`;
-    pads.insertBefore(p, $("#fingers"));
+    p.className = "pad"; p.dataset.pad = i;
+    p.innerHTML = `<div class="flash"></div><div class="smp"></div><div class="name">${PAD_NAMES[i]}</div>
+      <div class="acts"><button class="link" data-act="pick">Cambiar sonido</button><button class="link" data-act="rm">Original</button></div>`;
+    p.onpointerdown = e => { if (!e.target.closest("button")) send("hit", { slot: i, vel: 0.85 }); };
+    $("[data-act=pick]", p).onclick = () => send("pickSample", { pad: i });
+    $("[data-act=rm]", p).onclick = () => send("removeSample", { pad: i });
+    pads.appendChild(p);
   }
-  els.pads = $$(".pad", pads);
-  els.zoneNames = ["arriba izq.", "arriba", "arriba", "arriba dcha.", "abajo izq.", "abajo", "abajo", "abajo dcha."];
 
-  const kits = $("#kits");
-  s.kits.forEach((k, i) => {
-    const b = document.createElement("button");
-    b.textContent = k; b.dataset.v = i; b.title = `Kit ${k} (tecla ${i + 1})`;
-    kits.appendChild(b);
+  // Sampler: abajo los graves (como en el trackpad), arriba la octava siguiente.
+  const mel = $("#melPads");
+  [4, 5, 6, 7, 0, 1, 2, 3].forEach(i => {
+    const p = document.createElement("div");
+    p.className = "pad mel"; p.dataset.i = i;
+    p.innerHTML = `<div class="flash"></div><div class="name"></div><div class="deg">${i + 1}</div>`;
+    p.onpointerdown = () => send("samplerHit", { i });
+    mel.appendChild(p);
+  });
+  $("#smpPick").onclick = () => send("samplerPick");
+  $("#smpReset").onclick = () => send("samplerReset");
+  $("#tuneDown").onclick = () => send("samplerTune", { v: S.sampler.tune - 1 });
+  $("#tuneUp").onclick = () => send("samplerTune", { v: S.sampler.tune + 1 });
+
+  // Tonalidad (bajo, teclado y sampler comparten la misma)
+  $$(".keysel").forEach(k => {
+    k.innerHTML = `<select class="root" title="Tónica">${NOTE.map((n, i) => `<option value="${i}">${n}</option>`).join("")}</select>
+      <select class="scale" title="Escala">${s.key.scales.map((n, i) => `<option value="${i}">${n}</option>`).join("")}</select>`;
+    $(".root", k).onchange = e => send("root", { v: +e.target.value });
+    $(".scale", k).onchange = e => send("scale", { v: +e.target.value });
   });
 
-  wire();
+  // Bajo
+  $$("#bassTones button").forEach(b => b.onclick = () => send("bassTone", { v: +b.dataset.v }));
+  $("#bassLift").onclick = () => send("bassLift", { v: !S.bass.lift });
+  $("#bassNeck").addEventListener("pointerdown", e => {
+    const r = $("#bassNeck").getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    send("bassNote", { s: Math.min(3, Math.floor(y * 4)), f: Math.min(S.bass.frets, Math.floor(x * (S.bass.frets + 1))) });
+  });
+
+  // Teclado
+  s.keys.patches.forEach((n, i) => {
+    const b = document.createElement("button"); b.textContent = n; b.dataset.v = i;
+    b.onclick = () => send("patch", { v: i }); $("#patches").appendChild(b);
+  });
+  $("#octDown").onclick = () => send("octave", { v: S.keys.octave - 1 });
+  $("#octUp").onclick = () => send("octave", { v: S.keys.octave + 1 });
+  const kb = $("#keyboard");
+  const kpos = e => { const r = kb.getBoundingClientRect(); return { x: Math.min(0.999, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, 1 - (e.clientY - r.top) / r.height)) }; };
+  kb.addEventListener("pointerdown", e => { kb.setPointerCapture(e.pointerId); send("keysMouse", { ...kpos(e), v: true }); });
+  kb.addEventListener("pointermove", e => { if (e.buttons) send("keysMouse", { ...kpos(e), v: true }); });
+  kb.addEventListener("pointerup", e => send("keysMouse", { ...kpos(e), v: false }));
+  kb.addEventListener("pointercancel", e => send("keysMouse", { x: 0, y: 0, v: false }));
+
+  // Batería: clic en las zonas + mapa para el trackpad
+  $$("#zones .zone").forEach(z => z.onpointerdown = () => send("hit", { slot: +z.dataset.slot, vel: 0.85 }));
+  send("drumLayout", { v: $$("#zones .zone").map(z => [
+    +z.dataset.slot, +z.getAttribute("cx") / 1600, +z.getAttribute("cy") / 1000,
+    +z.getAttribute("rx") / 1600, +z.getAttribute("ry") / 1000]) });
+  $("#zonesBtn").onclick = () => document.body.classList.toggle("zones-visible");
+
+  // Guitarra
+  buildGuitar();
+  const ck = $("#chordKeys");
+  s.chords.forEach((name, i) => {
+    const b = document.createElement("button");
+    b.className = "ck"; b.dataset.c = i;
+    b.innerHTML = `<kbd>${CHORD_LABELS[i]}</kbd><span>${name}</span>`;
+    b.onclick = () => send("chord", { v: S.chord === i ? -1 : i });
+    ck.appendChild(b);
+  });
+  $$("#tones button").forEach(b => b.onclick = () => send("tone", { v: +b.dataset.v }));
+  $("#holdBtn").onclick = () => send("hold", { v: !S.hold });
+
+  // Beats
+  s.presets.forEach((n, i) => {
+    const b = document.createElement("button"); b.textContent = n;
+    b.onclick = () => send("preset", { v: i }); $("#presets").appendChild(b);
+  });
+  const head = $("#stepsHead");
+  head.innerHTML = "<span></span>" + Array.from({ length: 16 }, (_, j) => `<span class="${j % 4 === 0 && j ? "q" : ""}">${j % 4 === 0 ? j / 4 + 1 : "·"}</span>`).join("");
+  const grid = $("#grid");
+  s.rows.forEach((name, r) => {
+    const l = document.createElement("button"); l.className = "rl"; l.textContent = name; l.dataset.row = r;
+    l.onclick = () => send("hit", { slot: BEAT_ROW_SLOTS[r], vel: 0.85 });
+    grid.appendChild(l);
+    for (let j = 0; j < 16; j++) {
+      const c = document.createElement("div");
+      c.className = "cell" + (j % 4 === 0 && j ? " q" : ""); c.dataset.r = r; c.dataset.j = j;
+      grid.appendChild(c);
+    }
+  });
+  let paint = null;
+  grid.addEventListener("pointerdown", e => {
+    const c = e.target.closest(".cell"); if (!c) return;
+    const cur = S.pattern[+c.dataset.r][+c.dataset.j];
+    paint = cur > 0 ? 0 : (e.shiftKey ? 1 : 0.72);
+    setCell(c, paint);
+  });
+  grid.addEventListener("pointerover", e => {
+    const c = e.target.closest(".cell"); if (c && paint !== null && e.buttons) setCell(c, paint);
+  });
+  window.addEventListener("pointerup", () => paint = null);
+  $("#swing").oninput = e => { send("swing", { v: e.target.value / 100 }); fill(e.target); };
+  $("#beatsVol").oninput = e => { send("beatsVol", { v: e.target.value / 100 }); fill(e.target); };
+  $("#beatsOn").onclick = () => send("beatsOn", { v: !S.beatsOn });
+  $("#bounceBtn").onclick = () => send("bounce");
+
+  // Pistas
+  const lanes = $("#lanes");
+  s.tracks.forEach((_, t) => {
+    const lane = document.createElement("div");
+    lane.className = "lane"; lane.dataset.t = t;
+    lane.innerHTML = `<div class="lhead"><span class="n">${t + 1}</span><span class="nm"></span>
+        <button class="m" title="Silenciar">M</button><button class="so" title="Solo: solo suenan las pistas con S">S</button>
+        <input type="range" min="0" max="120" step="1" title="Volumen"><button class="more" title="Paneo, efectos y más">⋯</button></div>
+      <div class="lwave"><canvas></canvas></div><button class="lx" title="Vaciar pista">×</button>`;
+    $(".lhead", lane).onclick = e => { if (!e.target.closest("button,input")) send("selectTrack", { t }); };
+    $(".lwave", lane).onclick = () => send("selectTrack", { t });
+    $(".m", lane).onclick = () => send("trackMute", { t, v: !S.tracks[t].mute });
+    $(".so", lane).onclick = () => send("trackSolo", { t, v: !S.tracks[t].solo });
+    $(".more", lane).onclick = e => { e.stopPropagation(); openLanePop(t, e.currentTarget); };
+    $("input", lane).oninput = e => { send("trackVol", { t, v: e.target.value / 100 }); fill(e.target); };
+    $(".lx", lane).onclick = () => send("clearTrack", { t });
+    lanes.insertBefore(lane, $("#playhead"));
+  });
+
+  // Transporte
+  $$("#screens button").forEach(b => b.onclick = () => send("mode", { v: b.dataset.s }));
+  $("#playBtn").onclick = () => send("play");
+  $("#recBtn").onclick = () => send("rec");
+  $("#bpmDown").onclick = () => send("bpm", { v: S.bpm - 1 });
+  $("#bpmUp").onclick = () => send("bpm", { v: S.bpm + 1 });
+  $("#metroBtn").onclick = () => send("metro", { v: !S.metro });
+  $$("#bars button").forEach(b => b.onclick = () => send("bars", { v: +b.dataset.v }));
+  $("#undoBtn").onclick = () => send("undo");
+  $("#scenes").innerHTML = SCENES.map((n, i) => `<button data-v="${i}">${n}</button>`).join("");
+  $$("#scenes button").forEach(b => b.onclick = () => send("scene", { v: +b.dataset.v }));
+  $("#songBtn").onclick = () => send("songMode", { v: !S.songMode });
+  $("#chain").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.classList.contains("add")) send("songAdd", { v: S.scene }); else send("songRemove", { v: +b.dataset.i });
+  });
+  $$("#quant button").forEach(b => b.onclick = () => send("quant", { v: +b.dataset.v }));
+  $("#quantStr").oninput = e => { send("quantStrength", { v: e.target.value / 100 }); fill(e.target); };
+  $("#replaceBtn").onclick = () => send("replace", { v: !S.replace });
+
+  // Efectos
+  $("#fxBtn").onclick = e => { e.stopPropagation(); togglePop("#fxPop", e.currentTarget); };
+  $("#fxRev").oninput = e => { send("fxRevSize", { v: e.target.value / 100 }); fill(e.target); };
+  $("#fxFb").oninput = e => { send("fxDlyFb", { v: e.target.value / 100 }); fill(e.target); };
+  $("#fxComp").oninput = e => { send("fxCompAmt", { v: e.target.value / 100 }); fill(e.target); };
+  $$("#fxDiv button").forEach(b => b.onclick = () => send("fxDlyDiv", { v: +b.dataset.v }));
+  $("[data-fx=comp]").onclick = e => { if (!e.target.closest("input")) send("fxComp", { v: !S.fx.comp }); };
+
+  // Menú de cada pista
+  $("#lpPan").oninput = e => { send("trackPan", { t: laneT, v: e.target.value / 100 }); fill(e.target); };
+  $("#lpPan").ondblclick = e => { e.target.value = 0; fill(e.target); send("trackPan", { t: laneT, v: 0 }); };
+  $("#lpRev").oninput = e => { send("trackRev", { t: laneT, v: e.target.value / 100 }); fill(e.target); };
+  $("#lpDly").oninput = e => { send("trackDly", { t: laneT, v: e.target.value / 100 }); fill(e.target); };
+  $("#lpDup").onclick = () => { send("dupTrack", { t: laneT }); closePops(); };
+  $("#lpClear").onclick = () => { send("clearTrack", { t: laneT }); closePops(); };
+
+  // Proyecto
+  $("#projBtn").onclick = e => { e.stopPropagation(); togglePop("#projMenu", e.currentTarget, true); };
+  $$("#projMenu .item").forEach(b => b.onclick = () => { closePops(); send(b.dataset.act); });
+  $$(".capture").forEach(c => c.onclick = () => send("playMode", { v: !S.playMode }));
+
+  // Ajustes
+  $("#setBtn").onclick = e => { e.stopPropagation(); const open = $("#settings").classList.contains("show"); closePops(); $("#settings").classList.toggle("show", !open); };
+  document.addEventListener("pointerdown", e => { if (!e.target.closest(".pop,#setBtn,#fxBtn,#projBtn,.more")) closePops(); });
+  $$("#settings [data-set]").forEach(r => r.onclick = e => {
+    if (e.target.closest("input")) return;
+    const k = r.dataset.set;
+    const cur = { instant: S.audio.instantPref, velocity: S.vel.on, lid: S.lid.on, kick: S.kick.on, metroHaptic: S.metroHaptic, metroSound: S.metroSound, hapticPlay: S.hapticPlay, midi: S.midi.on }[k];
+    send(k, { v: !cur });
+  });
+  $("#outDev").onclick = openCal;
+  $("#calOpen").onclick = openCal;
+  $("#calReset").onclick = () => send("calReset");
+  $("#kickInstall").onclick = e => { e.stopPropagation(); send("kickInstall"); };
+  $("#kickUninstall").onclick = e => { e.stopPropagation(); send("kickUninstall"); };
+  $("#calGo").onclick = () => send("calStart");
+  $("#calClose").onclick = () => { send("calCancel"); $("#calModal").classList.remove("show"); };
+  $$("#langOpts button").forEach(b => b.onclick = () => send("language", { v: b.dataset.v }));
+  $("#kickSens").oninput = e => { send("kickThreshold", { v: 0.5 * Math.pow(0.03, e.target.value / 100) }); fill(e.target); };
+
+  document.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("keydown", onKey);
+  document.addEventListener("keyup", onKeyUp);
+  window.addEventListener("resize", () => { for (const t in waves) drawWave(+t); });
   built = true;
 }
 
-function wire() {
-  $$(".tab").forEach(b => b.onclick = () => send("mode", { v: b.dataset.mode }));
-  $$("#kits button").forEach(b => b.onclick = () => send("kit", { v: +b.dataset.v }));
-  $$(".switch[data-msg]").forEach(b => b.onclick = () => send(b.dataset.msg, { v: b.getAttribute("aria-checked") !== "true" }));
-  $$("[data-msg='lidCalibrate']").forEach(b => b.onclick = () => send("lidCalibrate"));
-  $("#playBtn").onclick = () => send("play");
-  $("#recBtn").onclick = () => send("rec");
-  $("#undoBtn").onclick = () => send("undo");
-  $("#clearBtn").onclick = () => send("clear");
-  $("#bpmDown").onclick = () => send("bpm", { v: S.bpm - 5 });
-  $("#bpmUp").onclick = () => send("bpm", { v: S.bpm + 5 });
-  $("#bpmSlider").oninput = e => { send("bpm", { v: +e.target.value }); fillRange(e.target); };
-  $("#tapBtn").onclick = tapTempo;
-  $("#metroSwitch").onclick = () => send("metro", { v: !S.metro });
-  $("#metroSound").onclick = () => send("metroSound", { v: !S.metroSound });
-  $("#metroHaptic").onclick = () => send("metroHaptic", { v: !S.metroHaptic });
-  $$("#bars button").forEach(b => b.onclick = () => send("bars", { v: +b.dataset.v }));
-  $("#quantBtn").onclick = () => send("quantize", { v: !S.quantize });
-  $("#kickSens").oninput = e => {
-    const th = 0.5 * Math.pow(0.03, e.target.value / 100);
-    send("kickThreshold", { v: th }); fillRange(e.target);
-  };
-  $("#helpBtn").onclick = () => tour.open();
-  els.pads.forEach(p => {
-    $("[data-act=pick]", p).onclick = () => send("pickSample", { pad: +p.dataset.pad });
-    $("[data-act=remove]", p).onclick = () => send("removeSample", { pad: +p.dataset.pad });
-  });
-
-  $("#playModeBtn").onclick = () => send("playMode", { v: true });
-  // En modo tocar no queremos menús contextuales (dos dedos = clic derecho).
-  document.addEventListener("contextmenu", e => e.preventDefault());
-
-  document.addEventListener("keydown", onKey);
+function setCell(c, v) {
+  const r = +c.dataset.r, j = +c.dataset.j;
+  if (S.pattern[r][j] === v) return;
+  S.pattern[r][j] = v;
+  send("step", { row: r, step: j, v });
+  c.classList.toggle("on", v > 0); c.style.setProperty("--v", v);
 }
+
+// ---------- Menús emergentes ----------
+let laneT = -1;
+function closePops() { $$(".pop").forEach(p => p.classList.remove("show")); laneT = -1; }
+/// Abre un menú junto a su botón: debajo si está arriba (proyecto), encima si está abajo (pistas).
+function togglePop(sel, btn, below) {
+  const pop = $(sel), open = pop.classList.contains("show");
+  closePops();
+  if (open) return;
+  pop.classList.add("show");
+  const r = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+  pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, below ? r.left : r.right - w)) + "px";
+  pop.style.top = (below ? r.bottom + 6 : Math.max(8, r.top - h - 6)) + "px";
+  pop.style.right = "auto";
+}
+function openLanePop(t, btn) {
+  const same = laneT === t && $("#lanePop").classList.contains("show");
+  togglePop("#lanePop", btn);
+  if (same) return;
+  laneT = t;
+  const pop = $("#lanePop"), r = btn.getBoundingClientRect();
+  pop.style.left = Math.min(innerWidth - pop.offsetWidth - 8, r.right + 6) + "px";
+  renderLanePop(true);
+}
+function renderLanePop(force) {
+  if (laneT < 0 || !S) return;
+  const tr = S.tracks[laneT];
+  txt($("#lpTitle"), T("Pista {0}", laneT + 1) + (tr.name ? " · " + T(tr.name) : ""));
+  const pan = Math.round(tr.pan * 100);
+  txt($("#lpPanVal"), pan === 0 ? T("centro") : (pan < 0 ? T("izq {0}", -pan) : T("der {0}", pan)));
+  txt($("#lpRevVal"), Math.round(tr.rev * 100)); txt($("#lpDlyVal"), Math.round(tr.dly * 100));
+  setRange($("#lpPan"), tr.pan * 100, force); setRange($("#lpRev"), tr.rev * 100, force); setRange($("#lpDly"), tr.dly * 100, force);
+  $("#lpDup").disabled = !tr.has;
+}
+
+function fill(el) { el.style.setProperty("--p", ((el.value - el.min) / (el.max - el.min) * 100) + "%"); }
+
+// ---------- Guitarra ----------
+const FRET_X = [144, 329.6, 489.6, 630.4, 755.2, 864]; // cejilla y trastes 1-5 (más juntos hacia el cuerpo)
+function buildGuitar() {
+  const svg = $("#gtrSvg");
+  const y = i => STRING_Y[i] * 1000;
+  let h = `<image href="assets/guitar.jpg" width="1600" height="1000" preserveAspectRatio="none"/><g id="chordDots"></g>`;
+  // Only transient string feedback overlays the exact raster string geometry.
+  for (let i = 0; i < 6; i++) h += `<line class="str" data-s="${i}" x1="0" x2="1440" y1="${y(i)}" y2="${y(i)}" stroke-width="${6 - i * 0.85}"/>`;
+  svg.innerHTML = h;
+
+  // Rasgueo con el ratón
+  const g = $("#guitar");
+  let last = null;
+  g.addEventListener("pointerdown", e => {
+    g.setPointerCapture(e.pointerId);
+    last = { y: rel(e), t: performance.now(), x: relX(e) };
+    const near = STRING_Y.findIndex(sy => Math.abs(sy - last.y) < 0.035);
+    if (near >= 0) send("pluck", { s: near, vel: 0.6, b: 0.25 + 0.7 * last.x });
+  });
+  g.addEventListener("pointermove", e => {
+    if (!last || !e.buttons) return;
+    const yy = rel(e), now = performance.now(), dy = yy - last.y;
+    const speed = Math.abs(dy) / Math.max(4, now - last.t) * 1000;
+    const vel = Math.min(1, Math.max(0.22, 0.2 + speed * 0.16));
+    const hit = STRING_Y.map((sy, i) => i).filter(i => dy > 0 ? (last.y < STRING_Y[i] && STRING_Y[i] <= yy) : (yy <= STRING_Y[i] && STRING_Y[i] < last.y));
+    (dy > 0 ? hit : hit.reverse()).forEach(i => send("pluck", { s: i, vel, b: 0.25 + 0.7 * relX(e) }));
+    last = { y: yy, t: now, x: relX(e) };
+  });
+  g.addEventListener("pointerup", () => last = null);
+  function rel(e) { const r = g.getBoundingClientRect(); return (e.clientY - r.top) / r.height; }
+  function relX(e) { const r = g.getBoundingClientRect(); return (e.clientX - r.left) / r.width; }
+}
+
+// ---------- Bajo ----------
+let drawnBass = "";
+function drawBass(s) {
+  const key = [s.key.root, s.key.scale, s.bass.frets, ...s.bass.tuning].join("/");
+  if (drawnBass === key) return;
+  drawnBass = key;
+  const F = s.bass.frets + 1, cw = 1600 / F;
+  let h = `<image href="assets/bass.jpg" width="1600" height="1000" preserveAspectRatio="none"/>`;
+  // Notas de la escala en cada traste; la tónica, rellena.
+  for (let i = 0; i < 4; i++) for (let f = 0; f < F; f++) {
+    const m = s.bass.tuning[i] + f, pc = ((m - s.key.root) % 12 + 12) % 12;
+    if (!s.key.steps.includes(pc)) continue;
+    const cx = (f + 0.5) * cw, cy = BASS_Y[i] * 1000, root = pc === 0 ? " root" : "";
+    h += `<circle class="mk${root}" cx="${cx}" cy="${cy}" r="30"/><text class="mkt${root}" x="${cx}" y="${cy + 8}" text-anchor="middle">${noteName(m)}</text>`;
+  }
+  h += `<circle class="hitdot" id="bassHit" r="40"/>`;
+  $("#bassSvg").innerHTML = h;
+}
+
+// ---------- Teclado ----------
+let drawnKeys = "";
+function drawKeys(s) {
+  const key = s.keys.notes.join(",") + "/" + s.key.root;
+  if (drawnKeys === key) return;
+  drawnKeys = key;
+  $("#keyboard").innerHTML = s.keys.notes.map(m => `<div class="kcol${((m - s.key.root) % 12 + 12) % 12 === 0 ? " root" : ""}"><span>${noteName(m)}${Math.floor(m / 12) - 1}</span></div>`).join("");
+}
+
+let drawnChord = null;
+function drawChord(s) {
+  if (drawnChord === s.chord) return;
+  drawnChord = s.chord;
+  const frets = s.chord >= 0 ? s.chordFrets[s.chord] : [0, 0, 0, 0, 0, 0];
+  let h = "";
+  frets.forEach((f, i) => {
+    const y = STRING_Y[i] * 1000;
+    if (f < 0) h += `<text class="mutex" x="100" y="${y + 15}" text-anchor="middle">×</text>`;
+    else if (f > 0) h += `<circle class="dotf" cx="${(FRET_X[f - 1] + FRET_X[f]) / 2}" cy="${y}" r="24"/>`;
+  });
+  $("#chordDots").innerHTML = h;
+  $("#chordName").textContent = s.chord >= 0 ? s.chords[s.chord] : T("Al aire");
+}
+
+// ---------- Teclado ----------
+function openCal() { $("#settings").classList.remove("show"); $("#calModal").classList.add("show"); }
 
 function onKey(e) {
-  if (e.key === "Escape" && S && S.playMode) { e.preventDefault(); send("playMode", { v: false }); return; }
-  if (e.key === "Enter" && S && !S.playMode && (!tour.isOpen || tour.steps[tour.i].wait)) {
-    e.preventDefault(); send("playMode", { v: true }); return;
-  }
-  if (tour.isOpen) {
-    if (e.key === "Escape") tour.close();
-    if (e.key === "Enter" || e.key === "ArrowRight") tour.next();
-    if (e.key === "ArrowLeft") tour.back();
+  if (e.target.closest && e.target.closest("input")) { if (e.code !== "Space") return; }
+  if (!S) return;
+  if ($("#calModal").classList.contains("show")) {
     e.preventDefault();
+    if (e.repeat) return;
+    if (e.code === "Space" && S.audio.calibrating) send("calTap");
+    else if (e.code === "Escape") $("#calClose").click();
+    else if ((e.code === "Enter" || e.code === "Space") && !S.audio.calibrating) send("calStart");
     return;
   }
-  const k = e.key.toLowerCase();
-  const map = {
-    " ": () => send("play"),
-    "r": () => send("rec"),
-    "z": () => send("undo"),
-    "c": () => send("clear"),
-    "m": () => send("metro", { v: !S.metro }),
-    "tab": () => send("mode", { v: S.mode === "drums" ? "loops" : "drums" }),
-    "arrowup": () => send("bpm", { v: S.bpm + (e.shiftKey ? 1 : 5) }),
-    "arrowdown": () => send("bpm", { v: S.bpm - (e.shiftKey ? 1 : 5) }),
-    "backspace": () => send("stopLoops"),
-    "?": () => tour.open(),
-  };
-  if ("1234".includes(k) && k.length === 1) map[k] = () => send("kit", { v: +k - 1 });
-  if (map[k]) { e.preventDefault(); map[k](); send("key"); }
-}
+  if (e.code === "Escape" && S.playMode) { e.preventDefault(); send("playMode", { v: false }); return; }
+  if (e.code === "Escape") { closePops(); return; }
 
-let taps = [];
-function tapTempo() {
-  const now = performance.now();
-  taps = taps.filter(t => now - t < 2500);
-  taps.push(now);
-  if (taps.length >= 2) {
-    const d = (taps[taps.length - 1] - taps[0]) / (taps.length - 1);
-    send("bpm", { v: Math.round(60000 / d) });
+  // Acordes en la pantalla de guitarra
+  const ci = CHORD_CODES.indexOf(e.code);
+  if (S.mode === "guitar" && ci >= 0 && ci < S.chords.length && !e.metaKey) {
+    e.preventDefault();
+    if (e.repeat) return;
+    const k = held.indexOf(ci); if (k >= 0) held.splice(k, 1);
+    held.push(ci);
+    send("chord", { v: ci });
+    return;
   }
+  if (e.metaKey && !e.repeat) {
+    const cmd = { KeyS: e.shiftKey ? "saveAs" : "save", KeyO: "open", KeyN: "newProject", KeyE: "export" }[e.code];
+    if (cmd) { e.preventDefault(); closePops(); send(cmd); return; }
+  }
+  if (e.repeat && e.code !== "ArrowUp" && e.code !== "ArrowDown") return;
+  const map = {
+    Space: () => send("play"),
+    KeyR: () => send("rec"),
+    KeyM: () => send("metro", { v: !S.metro }),
+    Enter: () => send("playMode", { v: !S.playMode }),
+    ArrowUp: () => send("bpm", { v: S.bpm + (e.shiftKey ? 5 : 1) }),
+    ArrowDown: () => send("bpm", { v: S.bpm - (e.shiftKey ? 5 : 1) }),
+  };
+  MODES.forEach((m, i) => map["Digit" + (i + 1)] = () => send("mode", { v: m }));
+  if (e.metaKey && e.code === "KeyZ") { e.preventDefault(); send("undo"); return; }
+  if (e.metaKey) return;
+  if (map[e.code]) { e.preventDefault(); map[e.code](); }
 }
 
-function fillRange(el) {
-  const p = (el.value - el.min) / (el.max - el.min) * 100;
-  el.style.setProperty("--p", p + "%");
+function onKeyUp(e) {
+  const ci = CHORD_CODES.indexOf(e.code);
+  if (ci < 0) return;
+  const k = held.indexOf(ci); if (k >= 0) held.splice(k, 1);
+  if (!S || S.mode !== "guitar" || S.hold) return;
+  send("chord", { v: held.length ? held[held.length - 1] : -1 });
 }
 
 // ---------- Render ----------
-function setSwitch(el, on, disabled = false) {
-  el.setAttribute("aria-checked", on ? "true" : "false");
-  el.disabled = disabled;
-}
+const txt = (el, v) => { if (el.textContent !== String(v)) el.textContent = v; };
 
 function render(s) {
-  const drums = s.mode === "drums";
-
-  $$(".tab").forEach(b => b.classList.toggle("on", b.dataset.mode === s.mode));
-  $$("#kits button").forEach(b => b.classList.toggle("on", +b.dataset.v === s.kit));
-
   document.body.classList.toggle("playing", s.playMode);
-  $("#stage").classList.toggle("playing", s.playMode);
-  $("#stage").classList.toggle("mouse", !s.playMode);
+  $$("#screens button").forEach(b => b.classList.toggle("on", b.dataset.s === s.mode));
+  $$(".screen").forEach(sc => sc.classList.toggle("on", sc.dataset.s === s.mode));
+  $$(".kits button").forEach(b => b.classList.toggle("on", +b.dataset.v === s.kit));
 
-  // Pista contextual
-  let hint, rec = false;
-  const vez = s.bars === 1 ? "cada compás" : `cada ${s.bars} compases`;
-  if (!s.playMode) {
-    hint = drums
-      ? "Pulsa <b>Empezar a tocar</b> (o <kbd>⏎</kbd>) para usar el trackpad como batería. Ahora mismo el trackpad mueve el ratón y no suena nada."
-      : "Pulsa <b>Empezar a tocar</b> (o <kbd>⏎</kbd>) y cada zona del trackpad arrancará un loop.";
-  } else if (!drums) {
-    hint = s.loops.some(l => l.on || l.pending)
-      ? "Toca una zona del trackpad para <b>activar o parar</b> su loop. Entran al empezar el siguiente compás. Vuelve a <b>Batería</b> para tocar encima."
-      : "Cada zona del trackpad arranca un loop. <b>Toca una</b> para empezar y ve sumando más.";
-  } else if (s.countIn > 0) {
-    hint = "<b>Cuenta atrás…</b> empieza a tocar cuando acabe."; rec = true;
-  } else if (s.recording) {
-    hint = `<b>Grabando.</b> Lo que toques se repetirá ${vez}. Pulsa <b>Grabar</b> otra vez cuando termines.`; rec = true;
-  } else if (s.playing && s.layers > 0) {
-    hint = "Tu ritmo suena en bucle. Pulsa <b>Grabar</b> para añadir otra capa encima, o <b>deshacer</b> para quitar la última.";
-  } else if (s.playing) {
-    hint = "Está corriendo el tempo. Pulsa <b>Grabar</b> para grabar lo que toques, o <b>Parar</b>.";
-  } else if (s.layers > 0) {
-    hint = "Tienes un ritmo grabado. Pulsa <b>▶</b> para escucharlo o <b>Grabar</b> para añadir más.";
-  } else {
-    hint = "Toca el trackpad para hacer sonar la batería. Cuando quieras crear un ritmo, pulsa <b>Grabar</b>.";
-  }
-  const hintEl = $("#hintText");
-  if (hintEl.innerHTML !== hint) hintEl.innerHTML = hint;
-  $("#hint").classList.toggle("rec", rec);
-
-  // Escenario
-  $("#stage").classList.toggle("recording", s.recording);
-  $("#stageTitle").textContent = drums ? "Tu trackpad" : "Loops";
-  $("#stageSub").textContent = drums ? "Cada zona del trackpad es un instrumento" : "Cada zona del trackpad arranca un loop";
-  $("#stageRight").textContent = drums && !s.playMode ? "Pasa el ratón por una zona para cambiar su sonido" : "";
-  $("#fingers").style.display = drums && s.playMode ? "" : "none";
-
-  els.pads.forEach((p, i) => {
-    const name = $(".name", p), sub = $(".sub", p);
-    let n, t = "", tag = false, on = false, pending = false;
-    if (drums) {
-      n = PAD_NAMES[i];
-      const smp = s.pads[i].sample;
-      if (smp) { t = "♪ " + smp; tag = true; }
-      else if (i === 0 && s.lid.ok && s.lid.on) t = s.lid.open ? "abierto" : "cerrado";
-    } else {
-      const l = s.loops[i];
-      n = l.name; on = l.on; pending = l.pending;
-      t = pending ? (on ? "se para al acabar el compás" : "entra al empezar el compás") : (on ? "sonando" : "toca para activar");
-    }
-    if (name.textContent !== n) name.textContent = n;
-    if (sub.textContent !== t) sub.textContent = t;
-    sub.classList.toggle("tag", tag);
-    p.classList.toggle("on", on);
-    p.classList.toggle("pending", pending);
-    $(".zone", p).textContent = els.zoneNames[i];
-    $(".actions", p).style.display = drums && !s.playMode ? "" : "none";
-    $("[data-act=remove]", p).style.display = s.pads[i].sample ? "" : "none";
+  // Captura del trackpad
+  $$(".capture").forEach(c => {
+    c.classList.toggle("on", s.playMode);
+    txt($("span", c), T(s.playMode ? "Tocando con el trackpad · Esc para soltar" : "Pulsa ⏎ para tocar con el trackpad"));
   });
 
-  // Cuenta atrás
-  $("#countin").classList.toggle("show", s.countIn > 0);
-  if (s.countIn > 0) $("#countN").textContent = s.countIn;
+  // Proyecto
+  txt($("#projName"), s.project.name);
+  $("#projBtn").classList.toggle("unsaved", s.project.unsaved);
+  txt($("#notice"), s.project.notice);
 
   // Transporte
-  const play = $("#playBtn");
-  const icon = s.playing ? ICONS.stop : ICONS.play;
-  if (play.dataset.icon !== (s.playing ? "stop" : "play")) { play.innerHTML = icon; play.dataset.icon = s.playing ? "stop" : "play"; }
-  play.title = s.playing ? "Parar (Espacio)" : "Reproducir (Espacio)";
+  const pb = $("#playBtn");
+  const icon = s.playing ? "stop" : "play";
+  if (pb.dataset.icon !== icon) { pb.innerHTML = ICON[icon]; pb.dataset.icon = icon; }
   $("#recBtn").classList.toggle("on", s.recording);
-  $("#recText").textContent = s.recording ? (s.countIn > 0 ? "Preparado…" : "Grabando") : "Grabar";
-  $("#undoBtn").disabled = s.layers === 0;
-  $("#clearBtn").disabled = s.layers === 0;
+  txt($("#bpmVal"), Math.round(s.bpm));
+  $("#tempo").classList.toggle("locked", s.tempoLocked);
+  $("#tempo").title = s.tempoLocked ? T("Hay audio grabado: el tempo queda fijo") : "";
+  $("#bpmDown").disabled = $("#bpmUp").disabled = s.tempoLocked;
+  $("#metroBtn").classList.toggle("on", s.metro);
+  // Compás actual y los 4 pulsos dentro de él.
+  const dots = $("#beatdots"), nb = s.bars * 4;
+  txt($("#barpos"), s.beat >= 0 ? `${Math.floor(s.beat / 4) + 1}/${s.bars}` : `–/${s.bars}`);
+  [...dots.children].forEach((d, b) => d.classList.toggle("now", s.beat >= 0 && s.beat % 4 === b));
+  dots.classList.toggle("rec", s.recording);
 
-  const beats = $("#beats");
-  if (beats.childElementCount !== s.beats) {
-    beats.innerHTML = "";
-    for (let b = 0; b < s.beats; b++) {
-      const i = document.createElement("i");
-      if (b % 4 === 0) i.className = "bar";
-      beats.appendChild(i);
-    }
-  }
-  [...beats.children].forEach((d, b) => d.classList.toggle("now", s.beat === b));
-  beats.classList.toggle("rec", s.recording);
-  beats.title = `Compás: pulso ${s.beat >= 0 ? s.beat + 1 : "–"} de ${s.beats}`;
+  $("#countin").classList.toggle("show", s.countIn > 0);
+  if (s.countIn > 0) txt($("#countin"), s.countIn);
 
-  $("#bpmVal").textContent = Math.round(s.bpm);
-  const sl = $("#bpmSlider");
-  if (document.activeElement !== sl) { sl.value = s.bpm; fillRange(sl); }
+  // Pads
+  $$("#pads .pad").forEach((p, i) => {
+    txt($(".smp", p), s.pads[i].sample);
+    $("[data-act=rm]", p).style.display = s.pads[i].sample ? "" : "none";
+  });
 
-  setSwitch($("#metroSwitch"), s.metro);
-  $("#metroSound").classList.toggle("on", s.metro && s.metroSound);
-  $("#metroHaptic").classList.toggle("on", s.metro && s.metroHaptic);
-  $("#metroSound").disabled = !s.metro;
-  $("#metroHaptic").disabled = !s.metro;
+  // Guitarra
+  drawChord(s);
+  $$(".ck").forEach(b => b.classList.toggle("on", +b.dataset.c === s.chord));
+  $$("#tones button").forEach(b => b.classList.toggle("on", +b.dataset.v === s.tone));
+  $("#holdBtn").classList.toggle("on", s.hold);
 
+  // Tonalidad
+  $$(".keysel").forEach(k => {
+    const r = $(".root", k), sc = $(".scale", k);
+    if (+r.value !== s.key.root) r.value = s.key.root;
+    if (+sc.value !== s.key.scale) sc.value = s.key.scale;
+  });
+
+  // Bajo
+  drawBass(s);
+  $$("#bassTones button").forEach(b => b.classList.toggle("on", +b.dataset.v === s.bass.tone));
+  $("#bassLift").classList.toggle("on", s.bass.lift);
+
+  // Teclado
+  drawKeys(s);
+  $$("#patches button").forEach(b => b.classList.toggle("on", +b.dataset.v === s.keys.patch));
+  txt($("#octVal"), s.keys.octave > 0 ? "+" + s.keys.octave : s.keys.octave);
+
+  // Sampler
+  txt($("#smpName"), s.sampler.custom ? s.sampler.name : T(s.sampler.name));
+  $("#smpReset").style.display = s.sampler.custom ? "" : "none";
+  txt($("#tuneVal"), s.sampler.tune > 0 ? "+" + s.sampler.tune : s.sampler.tune);
+  $$("#melPads .pad").forEach(p => txt($(".name", p), noteName(s.sampler.notes[+p.dataset.i])));
+
+  // Beats
+  $$("#grid .cell").forEach(c => {
+    const v = s.pattern[+c.dataset.r][+c.dataset.j];
+    c.classList.toggle("on", v > 0);
+    if (v > 0) c.style.setProperty("--v", v);
+    c.classList.toggle("now", +c.dataset.j === s.step);
+  });
+  [...$("#stepsHead").children].forEach((h, j) => h.classList.toggle("now", j - 1 === s.step));
+  $("#beatsOn").classList.toggle("on", s.beatsOn);
+  txt($("#beatsOn"), T(s.beatsOn ? "Sonando" : "En silencio"));
+  setRange($("#swing"), s.swing * 100);
+  setRange($("#beatsVol"), s.beatsVol * 100);
+
+  // Pistas, escenas y canción
   $$("#bars button").forEach(b => b.classList.toggle("on", +b.dataset.v === s.bars));
-  $("#quantBtn").classList.toggle("on", s.quantize);
-
-  // Panel lateral
-  setSwitch($("#fVel .switch"), s.vel.on);
-  $("#fVel").classList.toggle("off", !s.vel.on);
-  $("#velVal").textContent = s.vel.last > 0 ? Math.round(s.vel.last * 100) + "%" : "–";
-  $("#velBar").style.width = (s.vel.last * 100) + "%";
-
-  setSwitch($("#fLid .switch"), s.lid.on && s.lid.ok, !s.lid.ok);
-  $("#fLid").classList.toggle("off", !s.lid.on || !s.lid.ok);
-  if (s.lid.ok) {
-    // Vista lateral: bisagra en (40,60), base hacia la derecha; 90° = pantalla vertical.
-    const rot = (deg) => {
-      const r = 55, a = deg * Math.PI / 180;
-      return [40 + Math.cos(a) * r, 60 - Math.sin(a) * r];
-    };
-    const [x, y] = rot(Math.min(170, s.lid.angle));
-    const scr = $("#lidScreen"); scr.setAttribute("x2", x); scr.setAttribute("y2", y);
-    const [tx, ty] = rot(Math.min(170, s.lid.base + 6));
-    const th = $("#lidThreshold"); th.setAttribute("x2", tx); th.setAttribute("y2", ty);
-    $("#lidAngle").textContent = s.lid.angle + "°";
-    const st = $("#lidState");
-    st.textContent = s.lid.open ? "charles abierto" : "charles cerrado";
-    st.classList.toggle("green", s.lid.open);
-  } else {
-    $("#lidState").textContent = "sensor no disponible";
+  $$("#scenes button").forEach((b, i) => {
+    b.classList.toggle("on", s.scene === i);
+    b.classList.toggle("has", s.sceneHas[i]);
+    b.classList.toggle("queued", s.queuedScene === i);
+  });
+  $("#songBtn").classList.toggle("on", s.songMode);
+  const chain = $("#chain"), ck = s.songMode + "|" + s.song.join(",") + "|" + s.scene + "|" + LANG;
+  if (chain.dataset.k !== ck) {
+    chain.dataset.k = ck;
+    chain.innerHTML = s.songMode ? s.song.map((sc, i) => `<button data-i="${i}" title="${T("Quitar")}">${SCENES[sc]}</button>`).join("")
+      + `<button class="add" title="${T("Añadir la escena {0} al final", SCENES[s.scene])}">+</button>` : "";
   }
+  [...chain.querySelectorAll("button[data-i]")].forEach(b => b.classList.toggle("now", s.playing && s.songMode && +b.dataset.i === s.songPos));
+  $$("#quant button").forEach(b => b.classList.toggle("on", +b.dataset.v === s.quant));
+  $("#quantStr").style.visibility = s.quant > 0 ? "" : "hidden";
+  setRange($("#quantStr"), s.quantStrength * 100);
+  $("#quantStr").title = T("Fuerza: {0}%", Math.round(s.quantStrength * 100));
+  $("#replaceBtn").classList.toggle("on", s.replace);
 
-  setSwitch($("#fKick .switch"), s.kick.on && s.kick.ok, !s.kick.ok);
-  $("#fKick").classList.toggle("off", !s.kick.on || !s.kick.ok);
-  const full = s.kick.th * 3;
-  $("#kickBar").style.width = Math.min(100, s.kick.level / full * 100) + "%";
-  $("#kickMark").style.left = "33.3%";
-  $("#kickVal").textContent = s.kick.ok ? (s.kick.level / s.kick.th >= 1 ? "¡golpe!" : "") : "sensor no disponible";
+  // Efectos
+  setRange($("#fxRev"), s.fx.revSize * 100); txt($("#fxRevVal"), Math.round(s.fx.revSize * 100));
+  setRange($("#fxFb"), s.fx.dlyFb * 100); txt($("#fxFbVal"), Math.round(s.fx.dlyFb * 100));
+  setRange($("#fxComp"), s.fx.compAmt * 100); txt($("#fxCompVal"), s.fx.comp ? Math.round(s.fx.compAmt * 100) : T("apagado"));
+  $$("#fxDiv button").forEach(b => b.classList.toggle("on", +b.dataset.v === s.fx.dlyDiv));
+  $(".check", $("[data-fx=comp]")).classList.toggle("on", s.fx.comp);
+  renderLanePop(false);
+  $("#undoBtn").disabled = !s.canUndo;
+  const ruler = $("#ruler");
+  if (ruler.dataset.n !== String(nb)) {
+    ruler.dataset.n = nb;
+    ruler.innerHTML = Array.from({ length: nb }, (_, b) => {
+      const x = b / nb * 100;
+      return `<i class="${b % 4 === 0 ? "bar" : ""}" style="left:${x}%"></i>` + (b % 4 === 0 ? `<span style="left:${x}%">${b / 4 + 1}</span>` : "");
+    }).join("");
+  }
+  $$(".lane").forEach((lane, t) => {
+    const tr = s.tracks[t];
+    lane.classList.toggle("sel", s.recTrack === t);
+    lane.classList.toggle("rec", s.recording && s.recTrack === t);
+    lane.classList.toggle("has", tr.has);
+    txt($(".nm", lane), tr.has || (s.recording && s.recTrack === t) ? T(tr.name || "Audio") : T("Vacía"));
+    $(".m", lane).classList.toggle("on", tr.mute);
+    $(".so", lane).classList.toggle("on", tr.solo);
+    $(".more", lane).classList.toggle("fx", tr.rev > 0.13 || tr.dly > 0 || Math.abs(tr.pan) > 0.01);
+    setRange($("input", lane), tr.vol * 100);
+    if (lane.dataset.color !== tr.name) { lane.dataset.color = tr.name; drawWave(t); }
+  });
+  const ph = $("#playhead");
+  if (s.pos >= 0) {
+    const w = $(".lwave"), l = $("#lanes").getBoundingClientRect(), r = w.getBoundingClientRect();
+    ph.style.display = "block";
+    ph.style.left = (r.left - l.left + s.pos * r.width) + "px";
+  } else ph.style.display = "none";
+
+  // Salida de audio y calibración
+  const a = s.audio, latMs = a.cal >= 0 ? a.cal : a.lat;
+  const od = $("#outDev");
+  txt(od, `${a.bt ? "Bluetooth" : (a.name || T("Salida"))} · ${latMs} ms`);
+  od.classList.toggle("bt", a.bt && a.cal < 0);
+  od.title = T(a.bt && a.cal < 0 ? "Cascos inalámbricos: calibra el retraso para que las grabaciones cuadren" : "Salida de audio y su retraso");
+  txt($("#devName"), a.name + (a.bt ? " (Bluetooth)" : ""));
+  txt($("#devLat"), a.cal >= 0 ? T("Retraso calibrado: {0} ms (el sistema dice {1} ms)", a.cal, a.lat) : T("Retraso según el sistema: {0} ms · sin calibrar", a.lat));
+  $("#calReset").style.display = a.cal >= 0 ? "" : "none";
+  txt($("#instantInfo"), T(a.bt && !a.instantPref ? "Activada sola porque usas Bluetooth" : "Suena en cuanto rozas el trackpad (unos 10 ms antes)"));
+  const cdots = $("#calDots");
+  if (cdots.childElementCount !== a.total) cdots.innerHTML = "<i></i>".repeat(a.total);
+  [...cdots.children].forEach((d, i) => {
+    d.className = i < a.clicks ? (i === a.clicks - 1 && a.calibrating ? "now" : (i < 4 ? "warm" : "done")) : "";
+  });
+  txt($("#calRes"), a.calibrating ? T("Escuchando… {0} toques", a.taps) : (a.result || (a.cal >= 0 ? T("Calibrado: {0} ms.", a.cal) : "")));
+  $("#calGo").style.display = a.calibrating ? "none" : "";
+  $("#calModal").classList.toggle("busy", a.calibrating);
+  txt($("#calClose"), T(a.calibrating ? "Esc para cancelar" : "Cerrar"));
+  txt($("#calGo"), T(a.result || a.cal >= 0 ? "Repetir" : "Empezar"));
+
+  // Ajustes
+  const set = { instant: s.audio.instant, velocity: s.vel.on, lid: s.lid.on && s.lid.ok, kick: s.kick.on && s.kick.ok, metroHaptic: s.metroHaptic, metroSound: s.metroSound, hapticPlay: s.hapticPlay, midi: s.midi.on };
+  txt($("#midiInfo"), T(s.midi.failed ? "No se pudo crear la salida MIDI" : "Aparece como «TrackDrum» en GarageBand, Logic…"));
+  $$("#settings [data-set]").forEach(r => $(".check", r).classList.toggle("on", !!set[r.dataset.set]));
+  txt($("#lidInfo"), s.lid.ok ? T("Echa la pantalla hacia atrás para abrirlo · {0}°", s.lid.angle) : T("Sensor no disponible en este Mac"));
+  txt($("#kickInfo"), T(s.kick.installing ? "Esperando la contraseña…" : s.kick.ok ? "Un golpecito en el reposamuñecas"
+    : s.kick.root ? "Necesita un ayudante con permiso de administrador (se instala una vez)"
+    : s.kick.silent ? "El ayudante no responde. Prueba a reinstalarlo." : "Sensor no disponible en este Mac"));
+  $("#kickInstall").style.display = (s.kick.root || s.kick.silent) && !s.kick.installing ? "" : "none";
+  txt($("#kickInstall"), T(s.kick.silent ? "Reinstalar" : "Activar (pide contraseña una vez)"));
+  $$("#langOpts button").forEach(b => b.classList.toggle("on", b.dataset.v === s.langPref));
+  $("#kickUninstall").style.display = s.kick.helper && !s.kick.installing ? "" : "none";
+  $("#kickLevel").style.width = Math.min(100, s.kick.level / (s.kick.th * 3) * 100) + "%";
   const ks = $("#kickSens");
-  if (document.activeElement !== ks) {
-    ks.value = Math.round(Math.log(s.kick.th / 0.5) / Math.log(0.03) * 100);
-    fillRange(ks);
-  }
-
-  if (!s.onboarded && !tour.shownOnce) tour.open();
+  if (document.activeElement !== ks) { ks.value = Math.round(Math.log(s.kick.th / 0.5) / Math.log(0.03) * 100); fill(ks); }
 }
 
-function flash(i, v, kind) {
-  const p = els.pads && els.pads[i];
-  if (!p) return;
-  p.style.setProperty("--hit", (0.35 + 0.65 * v).toFixed(2));
-  p.classList.remove("hit"); void p.offsetWidth; p.classList.add("hit");
-  if (kind === 0) tour.onHit(i, v);
+function setRange(el, v, force) { if ((force || document.activeElement !== el) && +el.value !== Math.round(v)) { el.value = Math.round(v); fill(el); } else if (force) fill(el); }
+
+function drawWave(t) {
+  const lane = $$(".lane")[t]; if (!lane) return;
+  const cv = $("canvas", lane), r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  cv.width = Math.max(1, r.width * dpr); cv.height = Math.max(1, r.height * dpr);
+  const g = cv.getContext("2d"); g.clearRect(0, 0, cv.width, cv.height);
+  const p = waves[t]; if (!p || !p.length) return;
+  g.fillStyle = WAVE_COLOR[S && S.tracks[t] ? S.tracks[t].name : ""] || "#8d8b84";
+  const mid = cv.height / 2, bw = cv.width / p.length;
+  p.forEach((v, i) => { const h = Math.max(1, Math.sqrt(v) * mid * 0.92); g.fillRect(i * bw, mid - h, Math.max(1, bw - 0.5), h * 2); });
+}
+
+function flash(kind, i, v) {
+  if (kind === 2) {
+    const d = $("#bassHit"); if (!d || !S) return;
+    d.setAttribute("cx", (v + 0.5) * 1600 / (S.bass.frets + 1)); d.setAttribute("cy", BASS_Y[i] * 1000);
+    d.classList.remove("on"); void d.getBBox(); d.classList.add("on");
+    return;
+  }
+  if (kind === 3) {
+    const p = $(`#melPads .pad[data-i="${i}"]`);
+    if (p) { p.style.setProperty("--v", (0.3 + 0.6 * v).toFixed(2)); p.classList.add("hit"); requestAnimationFrame(() => requestAnimationFrame(() => p.classList.remove("hit"))); }
+    return;
+  }
+  if (kind === 1) {
+    const st = $(`#gtrSvg .str[data-s="${i}"]`);
+    if (st) { st.classList.remove("hit"); void st.getBBox(); st.classList.add("hit"); }
+    return;
+  }
+  const pad = i === 8 || i === 9 ? 0 : i;
+  const p = $$("#pads .pad")[pad];
+  if (p && pad < 8) {
+    p.style.setProperty("--v", (0.3 + 0.6 * v).toFixed(2));
+    p.classList.add("hit"); requestAnimationFrame(() => requestAnimationFrame(() => p.classList.remove("hit")));
+  }
+  const piece = $(`#kitSvg .piece[data-slot="${i === 8 || i === 9 ? 0 : i}"]`);
+  if (piece) { piece.classList.remove("hit"); void piece.getBBox(); piece.classList.add("hit"); }
+  const row = BEAT_ROW_SLOTS.indexOf(i);
+  const rl = row >= 0 && $(`#grid .rl[data-row="${row}"]`);
+  if (rl) { rl.classList.add("hit"); setTimeout(() => rl.classList.remove("hit"), 120); }
 }
 
 function fingers(list) {
-  const layer = $("#fingers");
+  const layer = $(".screen.on .fingers"); if (!layer) return;
+  $$(".fingers").forEach(l => { if (l !== layer) l.innerHTML = ""; });
   while (layer.childElementCount < list.length) { const d = document.createElement("div"); d.className = "finger"; layer.appendChild(d); }
   [...layer.children].forEach((d, i) => {
     const f = list[i];
@@ -797,97 +1283,33 @@ function fingers(list) {
     d.style.display = "";
     d.style.left = (f[0] * 100) + "%";
     d.style.top = ((1 - f[1]) * 100) + "%";
-    const size = 18 + Math.min(2, f[2]) * 10;
-    d.style.width = d.style.height = size + "px";
-    d.style.margin = `-${size / 2}px 0 0 -${size / 2}px`;
   });
 }
-
-// ---------- Guía paso a paso ----------
-const tour = {
-  i: 0, isOpen: false, shownOnce: false, hitDone: false, hits: [],
-  steps: [
-    {
-      title: "Tu trackpad es una batería",
-      body: "Cada zona del trackpad es un instrumento. Pulsa ⏎ para empezar a tocar y prueba con uno o varios dedos. Mientras tocas, el ratón se bloquea: pulsa Esc para recuperarlo.",
-      ill: () => `<div style="width:100%"><div class="minimap">${PAD_NAMES.map((n, i) => `<div data-mini="${i}" style="--c:var(--c${i + 1})"><b class="glow"></b><span>${n}</span></div>`).join("")}</div>
-        <div class="waiting" id="tourWait">◌ Pulsa <kbd>⏎</kbd> y toca el trackpad</div></div>`,
-      wait: true,
-    },
-    {
-      title: "Más fuerte, más volumen", wait: true,
-      body: "Toca suave y luego fuerte: cambia el volumen y también la vibración que notas en el dedo. (⏎ para tocar, Esc para volver al ratón.)",
-      ill: () => `<div class="bigmeter"><div class="row" style="margin-bottom:8px"><span class="muted">Fuerza de tu último golpe</span><span class="grow"></span><b id="tourVelVal">–</b></div><div class="meter"><i id="tourVel"></i></div></div>`,
-    },
-    {
-      title: "Graba tu propio ritmo",
-      body: "No hace falta saber música: lo que toques se repetirá en bucle y puedes ir añadiendo capas. Mientras tocas, usa el teclado: R graba, Espacio para y arranca.",
-      ill: () => `<div class="tour-steps">
-        <div><b>1. Pulsa R</b>Sonará una cuenta atrás de 4 clics.</div>
-        <div><b>2. Toca</b>Por ejemplo, solo el bombo. Se repetirá solo.</div>
-        <div><b>3. Añade capas</b>Pulsa R otra vez y toca la caja encima.</div></div>`,
-    },
-    {
-      title: "Loops listos para usar",
-      body: "En la pestaña Loops cada zona del trackpad arranca un ritmo, un bajo o unos acordes, siempre a tempo. Actívalos y vuelve a Batería para tocar encima.",
-      ill: () => `<div class="tour-steps"><div><b>Beat · Break · Charles · Percu</b>Ritmos de batería.</div><div><b>Bajo · Acordes · Arpegio · Pad</b>Melodías que combinan entre sí.</div></div>`,
-    },
-    {
-      title: "Trucos con los sensores del Mac",
-      body: "Tu MacBook tiene sensores escondidos y TrackDrum los aprovecha. Puedes activarlos o quitarlos en el panel de la derecha.",
-      ill: () => `<div class="tour-steps"><div><b>Tapa = charles</b>Echa la pantalla un poco hacia atrás y el charles sonará abierto.</div><div><b>Golpe = bombo</b>Un golpecito en el reposamuñecas hace sonar el bombo.</div></div>`,
-    },
-  ],
-  open() { this.i = 0; this.isOpen = true; this.shownOnce = true; this.show(); $("#tourOverlay").classList.add("show"); },
-  close() { this.isOpen = false; $("#tourOverlay").classList.remove("show"); send("onboarded"); },
-  next() {
-    if (this.i < this.steps.length - 1) { this.i++; this.show(); }
-    else { this.close(); send("playMode", { v: true }); }
-  },
-  back() { if (this.i > 0) { this.i--; this.show(); } },
-  show() {
-    const st = this.steps[this.i];
-    $("#tourN").textContent = `Paso ${this.i + 1} de ${this.steps.length}`;
-    $("#tourTitle").textContent = st.title;
-    $("#tourBody").textContent = st.body;
-    $("#tourIll").innerHTML = st.ill();
-    $("#tourDots").innerHTML = this.steps.map((_, j) => `<i class="${j === this.i ? "on" : ""}"></i>`).join("");
-    $("#tourBack").style.visibility = this.i === 0 ? "hidden" : "";
-    $("#tourNext").textContent = this.i === this.steps.length - 1 ? "¡A tocar!" : "Siguiente";
-    this.hitDone = false;
-  },
-  onHit(i, v) {
-    if (!this.isOpen) return;
-    const mini = $(`[data-mini="${i}"]`);
-    if (mini) { mini.classList.remove("hit"); void mini.offsetWidth; mini.classList.add("hit"); }
-    if (this.steps[this.i].wait && !this.hitDone) {
-      this.hitDone = true;
-      const w = $("#tourWait");
-      if (w) { w.innerHTML = `✓ ¡Bien! Eso era: ${PAD_NAMES[i]}. Cuando acabes, pulsa <kbd>Esc</kbd> y luego Siguiente.`; w.classList.add("done"); }
-    }
-    const tv = $("#tourVel");
-    if (tv) { tv.style.width = (v * 100) + "%"; $("#tourVelVal").textContent = Math.round(v * 100) + "%"; }
-  },
-};
-$("#tourNext").onclick = () => tour.next();
-$("#tourBack").onclick = () => tour.back();
-$("#tourSkip").onclick = () => tour.close();
 
 // ---------- API para la app nativa ----------
 window.TD = {
   frame(s, flashes, fl) {
-    if (s) { if (!built) build(s); S = s; render(s); }
-    if (flashes) flashes.forEach(([i, v, k]) => flash(i, v, k));
+    if (s) {
+      if (!built) build(s);
+      S = s;
+      if (s.lang !== LANG || !translated) { LANG = s.lang; translated = true; translateDom(); }
+      if (s.waves) for (const t in s.waves) { waves[t] = s.waves[t]; drawWave(+t); }
+      render(s);
+    }
+    if (flashes) flashes.forEach(([k, i, v]) => flash(k, i, v));
     if (fl && built) fingers(fl);
   },
+  /// Dónde cae un archivo: un pad (0..7), el sampler (-2) o nada (-1).
   padAt(x, y) {
+    if (S && S.mode === "sampler") return -2;
     const el = document.elementFromPoint(x, y);
-    const p = el && el.closest(".pad");
-    return p ? +p.dataset.pad : -1;
+    const p = el && el.closest("#pads .pad");
+    return p && S && S.mode === "pads" ? +p.dataset.pad : -1;
   },
   dragOver(x, y) {
     const i = x < 0 ? -1 : this.padAt(x, y);
-    (els.pads || []).forEach((p, j) => p.classList.toggle("drop", j === i && S && S.mode === "drums"));
+    $$("#pads .pad").forEach((p, j) => p.classList.toggle("drop", j === i));
+    $("#melPads").classList.toggle("dropping", i === -2);
   },
 };
 send("ready");

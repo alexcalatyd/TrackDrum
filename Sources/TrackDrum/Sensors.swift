@@ -78,7 +78,16 @@ final class LidPedal {
 
 /// Golpes en el chasis (reposamuñecas) con el acelerómetro oculto → bombo.
 final class AccelKick {
-    private(set) var available = false
+    /// El dispositivo se abrió (aunque puede no mandar datos sin root).
+    private(set) var opened = false
+    private var lastReport = 0.0
+    /// Está llegando información del sensor de verdad.
+    var available: Bool { CACurrentMediaTime() - lastReport < 1 }
+    /// Se abre pero no manda nada: sin root macOS no deja despertar el sensor y falta el ayudante.
+    var needsRoot: Bool { opened && !available && getuid() != 0 && !AccelHelper.isInstalled }
+    /// El ayudante está instalado pero no llega nada.
+    var helperSilent: Bool { opened && !available && getuid() != 0 && AccelHelper.isInstalled }
+    private let link = AccelLink()
     var enabled = true
     var threshold = 0.12 // en g
     /// Fuerza del golpe (0..1). Hilo del sensor.
@@ -95,13 +104,42 @@ final class AccelKick {
     private var refractoryUntil = 0.0
     static var shared: AccelKick?
 
+    private var watchdog: Timer?
+    private var silentSince = 0.0
+
     func start() {
         AccelKick.shared = self
-        available = accel_start { x, y, z in AccelKick.shared?.process(x, y, z) } == 1
+        open()
+        if getuid() != 0 {
+            link.onSample = { x, y, z in AccelKick.shared?.process(x, y, z) }
+            link.start()
+        }
+        // Vigilante: si deja de llegar información (el Mac ha dormido el sensor), lo despertamos
+        // y, si sigue callado, lo volvemos a abrir.
+        watchdog = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            // Sin root, los datos los trae el ayudante: solo hay que saludarle.
+            if getuid() != 0 { self.link.sayHello(); return }
+            let now = CACurrentMediaTime()
+            if self.available { self.silentSince = 0; return }
+            if self.silentSince == 0 { self.silentSince = now }
+            accel_wake()
+            if now - self.silentSince > 3 {
+                FileHandle.standardError.write("TrackDrum: el acelerómetro no responde, lo reabro\n".data(using: .utf8)!)
+                self.open()
+                self.silentSince = now
+            }
+        }
+    }
+
+    private func open() {
+        opened = accel_start { x, y, z in AccelKick.shared?.process(x, y, z) } == 1
+        if !opened { FileHandle.standardError.write("TrackDrum: no se pudo abrir el acelerómetro\n".data(using: .utf8)!) }
     }
 
     private func process(_ x: Double, _ y: Double, _ z: Double) {
         let now = CACurrentMediaTime()
+        lastReport = now
         // Paso alto: quitamos la gravedad y la inclinación.
         avg.0 += 0.02 * (x - avg.0)
         avg.1 += 0.02 * (y - avg.1)

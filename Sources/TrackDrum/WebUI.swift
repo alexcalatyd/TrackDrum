@@ -51,7 +51,9 @@ final class WebUI: NSObject, WKScriptMessageHandler {
         controller.add(self, name: "td")
         view.setValue(false, forKey: "drawsBackground")
         view.allowsMagnification = false
-        if let url = Bundle.module.url(forResource: "index", withExtension: "html", subdirectory: "Web") {
+        // Dentro de TrackDrum.app la web va en Contents/Resources/Web; con `swift build`, en el bundle de SwiftPM.
+        if let url = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "Web")
+            ?? Bundle.module.url(forResource: "index", withExtension: "html", subdirectory: "Web") {
             view.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         }
     }

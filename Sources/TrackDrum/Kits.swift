@@ -5,8 +5,10 @@ enum Slot {
     static let hat = 0, tomHi = 1, tomLo = 2, cymbal = 3
     static let kick = 4, snare = 5, clap = 6, cowbell = 7
     static let openHat = 8, pedal = 9
-    static let count = 10
+    static let floorTom = 10, ride = 11
+    static let count = 12
     static let padNames = ["Charles", "Tom alto", "Tom bajo", "Platillo", "Bombo", "Caja", "Clap", "Cencerro"]
+    static let padNamesEN = ["Hi-hat", "High tom", "Low tom", "Cymbal", "Kick", "Snare", "Clap", "Cowbell"]
 }
 
 enum Wave { case sine, square, triangle }
@@ -81,6 +83,17 @@ enum Drum {
         }
     }
 
+    /// Ride: más metálico y con "ping" que el platillo.
+    static func ride(decay: Double, cutoff: Double, dur: Double, bell: Double = 0.35) -> [Double] {
+        var hp = OnePole(cutoff: cutoff)
+        return DSP.render(dur) { t in
+            let metal = DSP.metallic(t, scale: 3.1)
+            let ping = (sin(2 * .pi * 3150 * t) + 0.6 * sin(2 * .pi * 4720 * t)) * exp(-t * 9) * bell
+            let x = hp.highpass(metal * 0.8 + DSP.noise() * 0.2) * exp(-decay * t)
+            return (x + ping) * min(1, t / 0.0015)
+        }
+    }
+
     static func clap(center: Double, tail: Double, bursts: Int, dur: Double) -> [Double] {
         var bp = BandPass(center: center, q: 1.2)
         let spacing = 0.0105
@@ -123,7 +136,7 @@ enum Kits {
     }
 
     private static func kit(_ name: String, _ raw: [[Double]], crush: Bool = false) -> Kit {
-        let peaks: [Double] = [0.6, 0.85, 0.85, 0.55, 0.95, 0.85, 0.8, 0.6, 0.55, 0.45]
+        let peaks: [Double] = [0.6, 0.85, 0.85, 0.55, 0.95, 0.85, 0.8, 0.6, 0.55, 0.45, 0.9, 0.45]
         let sounds = raw.enumerated().map { i, v -> Sample in
             let processed = crush ? DSP.crush(v, bits: 4, hold: 4) : v
             return DSP.finish(processed, peak: peaks[i])
@@ -143,6 +156,8 @@ enum Kits {
             Drum.cowbell(f1: 540, f2: 800, decay: 9, dur: 0.45),
             Drum.hat(decay: 6, cutoff: 7000, metal: 0.75, dur: 0.6),
             Drum.hat(decay: 90, cutoff: 5000, metal: 0.6, dur: 0.05),
+            Drum.tom(f0: 120, f1: 88, decay: 5, noise: 0.15, dur: 0.9),
+            Drum.ride(decay: 2.6, cutoff: 5000, dur: 1.6),
         ])
     }
 
@@ -158,6 +173,8 @@ enum Kits {
             Drum.cowbell(f1: 700, f2: 1050, decay: 14, dur: 0.35),
             Drum.hat(decay: 5, cutoff: 6000, metal: 0.35, dur: 0.7, scale: 2.2),
             Drum.hat(decay: 80, cutoff: 4000, metal: 0.3, dur: 0.06, scale: 2.2),
+            Drum.tom(f0: 105, f1: 74, decay: 4.5, noise: 0.35, dur: 1.0),
+            Drum.ride(decay: 1.8, cutoff: 3500, dur: 2.2, bell: 0.5),
         ])
     }
 
@@ -173,6 +190,8 @@ enum Kits {
             Drum.cowbell(f1: 600, f2: 900, decay: 14, dur: 0.35),
             Drum.hat(decay: 9, cutoff: 9000, metal: 0.9, dur: 0.45, scale: 2),
             Drum.hat(decay: 110, cutoff: 6000, metal: 0.8, dur: 0.04, scale: 2),
+            Drum.tom(f0: 200, f1: 90, decay: 6, noise: 0.05, dur: 0.7, wave: .triangle),
+            Drum.ride(decay: 3.5, cutoff: 7000, dur: 1.2),
         ])
     }
 
@@ -188,6 +207,8 @@ enum Kits {
             Drum.cowbell(f1: 660, f2: 990, decay: 12, dur: 0.3),
             Drum.hat(decay: 8, cutoff: 5000, metal: 0, dur: 0.4),
             Drum.hat(decay: 100, cutoff: 3000, metal: 0, dur: 0.04),
+            Drum.tom(f0: 150, f1: 95, decay: 6, noise: 0, dur: 0.55, wave: .square),
+            Drum.ride(decay: 4, cutoff: 3000, dur: 0.8, bell: 0.2),
         ], crush: true)
     }
 }

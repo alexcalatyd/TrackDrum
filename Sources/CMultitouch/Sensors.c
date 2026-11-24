@@ -64,6 +64,8 @@ int lid_angle(void) {
 // ---------------------------------------------------------------------------
 
 static AccelCallback g_accel_cb = NULL;
+static CFRunLoopRef g_accel_loop = NULL;
+static IOHIDDeviceRef g_accel_dev = NULL;
 static uint8_t g_accel_buffer[64];
 
 static void accel_report(void *ctx, IOReturn result, void *sender, IOHIDReportType type,
@@ -100,11 +102,24 @@ static void *accel_thread(void *arg) {
     IOHIDDeviceRef device = (IOHIDDeviceRef)arg;
     IOHIDDeviceRegisterInputReportCallback(device, g_accel_buffer, sizeof(g_accel_buffer), accel_report, NULL);
     IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+    g_accel_loop = CFRunLoopGetCurrent();
     CFRunLoopRun();
+    IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+    CFRelease(device);
     return NULL;
 }
 
+void accel_wake(void) { wake_spu_sensors(); }
+
+void accel_stop(void) {
+    if (g_accel_loop) { CFRunLoopStop(g_accel_loop); g_accel_loop = NULL; }
+    if (g_accel_dev) { IOHIDDeviceClose(g_accel_dev, kIOHIDOptionsTypeNone); CFRelease(g_accel_dev); g_accel_dev = NULL; }
+}
+
 int accel_start(AccelCallback callback) {
+    // Si ya había uno abierto (reinicio), lo cerramos antes.
+    accel_stop();
+
     IOHIDManagerRef manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
     IOHIDManagerOpen(manager, kIOHIDOptionsTypeNone);
     wake_spu_sensors();
@@ -114,6 +129,8 @@ int accel_start(AccelCallback callback) {
         CFRelease(device);
         return 0;
     }
+    CFRetain(device);
+    g_accel_dev = device;
     g_accel_cb = callback;
     pthread_t thread;
     pthread_attr_t attr;
