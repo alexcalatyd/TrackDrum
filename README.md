@@ -4,6 +4,8 @@
 
 <p align="center">Turn your MacBook's trackpad into an instrument — and loop what you play.</p>
 
+<p align="center"><img src="docs/screenshots/drums.png" width="800" alt="TrackDrum drum kit screen"></p>
+
 TrackDrum is a native macOS app (Swift + a WKWebView interface) that reads raw multitouch data from the trackpad, so every finger, position and pressure becomes a note. It also uses the MacBook's hidden sensors: the lid angle works as a hi-hat pedal and a tap on the palm rest plays the kick.
 
 *La app está en inglés y en español: sigue el idioma del Mac y se puede cambiar en Ajustes.*
@@ -17,6 +19,19 @@ TrackDrum is a native macOS app (Swift + a WKWebView interface) that reads raw m
 - **Keys** — polyphonic synth: horizontal = notes, vertical = brightness, pressure = vibrato.
 - **Sampler** — eight melodic pads that follow the key; load any sound and tune it.
 - **Beats** — 16-step sequencer with presets, swing and "send to track".
+
+## Screenshots
+
+| | |
+| --- | --- |
+| ![Pads](docs/screenshots/pads.png) | ![Guitar](docs/screenshots/guitar.png) |
+| **Pads** | **Guitar** |
+| ![Bass](docs/screenshots/bass.png) | ![Keys](docs/screenshots/keys.png) |
+| **Bass** | **Keys** |
+| ![Sampler](docs/screenshots/sampler.png) | ![Beats](docs/screenshots/beats.png) |
+| **Sampler** | **Beats** |
+
+<sub>Screenshots show the Spanish interface; the app follows your Mac's language.</sub>
 
 ## Looper
 
